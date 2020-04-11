@@ -37,6 +37,7 @@ repositories {
 compileKotlin2Js {
     kotlinOptions.sourceMap = true
     kotlinOptions.sourceMapEmbedSources = "always"
+    kotlinOptions.moduleKind = "commonjs"
     // remaining configuration options
 }
 
