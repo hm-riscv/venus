@@ -2,8 +2,6 @@ package venus
 
 /* ktlint-disable no-wildcard-imports */
 
-import org.w3c.dom.*
-import org.w3c.dom.url.URL
 import venus.api.venuspackage
 import venus.terminal.Terminal
 import venus.terminal.cmds.vdb
@@ -23,11 +21,26 @@ import venusbackend.simulator.cache.BlockReplacementPolicy
 import venusbackend.simulator.cache.CacheError
 import venusbackend.simulator.cache.CacheHandler
 import venusbackend.simulator.cache.PlacementPolicy
-import kotlin.browser.document
-import kotlin.browser.window
+
+// using these imports only for type checks and fake DOM
 import kotlin.dom.addClass
-import kotlin.dom.hasClass
 import kotlin.dom.removeClass
+import kotlin.dom.hasClass
+import org.w3c.dom.*
+
+external class Timeout
+external fun setInterval(
+    callback: dynamic,
+    delay: Int = definedExternally,
+    vararg args: Any?
+): Timeout
+external fun setTimeout(
+    callback: dynamic,
+    delay: Int = definedExternally,
+    vararg args: Any?
+): Timeout
+external fun clearTimeout(handle: Timeout = definedExternally): Unit
+external val document: Document
 
 /* ktlint-enable no-wildcard-imports */
 
@@ -55,10 +68,10 @@ import kotlin.dom.removeClass
     val simState64 = SimulatorState64()
     val temp = QuadWord()
 
-    private var timer: Int? = null
+    private var timer: Timeout? = null
     val LS = LocalStorage()
     var useLS = false
-    private var saveInterval: Int? = null
+    private var saveInterval: Timeout? = null
     var p = ""
     private var ready = false
     @JsName("FReginputAsFloat") var FReginputAsFloat = true
@@ -83,7 +96,7 @@ import kotlin.dom.removeClass
         useLS = LS.get("venus") == "true"
         Renderer.renderButton(document.getElementById("sv") as HTMLButtonElement, useLS)
 
-        window.setTimeout(Driver::initTimeout, 5)
+        setTimeout(Driver::initTimeout, 5)
 
         console.log("Finished loading driver!")
     }
@@ -94,7 +107,7 @@ import kotlin.dom.removeClass
         js("load_update_message(\"Initializing Venus: Renderer\");")
         Renderer.loadSimulator(sim)
         Renderer.renderAssembleButtons()
-        saveInterval = window.setInterval(Driver::saveIntervalFn, 10000)
+        saveInterval = setInterval(Driver::saveIntervalFn, 10000)
         Driver.ready = true
         initFinish()
     }
@@ -110,7 +123,7 @@ import kotlin.dom.removeClass
 }""")
             js("window.driver_load_done();")
         } else {
-            window.setInterval(Driver::initFinish, 100)
+            setInterval(Driver::initFinish, 100)
         }
     }
 
@@ -168,11 +181,18 @@ import kotlin.dom.removeClass
                 handleError("Open Simulator", e)
             }
         } else {
-            window.setTimeout(Driver::openSimulator, 100)
+            setTimeout(Driver::openSimulator, 100)
         }
     }
 
+    /**
+     * DEPRECATED
+     * no operation
+     * should be irrelevant
+     * looks for some url-args
+     */
     @JsName("checkURLParams") fun checkURLParams() {
+        /*
         var clearparams = true
         val currentURL = URL(window.location.href)
 
@@ -243,11 +263,19 @@ import kotlin.dom.removeClass
         if (clearparams) {
             clearURLParams()
         }
+         */
     }
 
+    /**
+     * DEPRECATED
+     * No Operation
+     * see fun checkURLParams
+     */
     fun clearURLParams() {
+        /*
         val location = window.location.origin + window.location.pathname
         js("window.history.replaceState({}, document.title, location)")
+        */
     }
 
     fun parseString(s: String): String {
@@ -292,7 +320,7 @@ import kotlin.dom.removeClass
      * Gets the text from the textarea editor.
      */
     @JsName("getText") internal fun getText(): String {
-        val editor = document.getElementById("asm-editor") as HTMLTextAreaElement
+        val editor = kotlin.browser.document.getElementById("asm-editor") as HTMLTextAreaElement
         return editor.value
     }
 
@@ -346,9 +374,9 @@ import kotlin.dom.removeClass
         if (sim.exitcode != null) {
             val msg = "Exited with error code ${sim.exitcode}"
             if (sim.exitcode ?: 0 == 0) {
-                js("window.alertify.message(msg)")
+                console.log(msg)
             } else {
-                js("window.alertify.error(msg)")
+                console.warn(msg)
             }
         }
     }
@@ -384,7 +412,7 @@ import kotlin.dom.removeClass
         } else {
             try {
                 Renderer.setRunButtonSpinning(true)
-                timer = window.setTimeout(Driver::runStart, TIMEOUT_TIME, true)
+                timer = setTimeout(Driver::runStart, TIMEOUT_TIME, true)
                 sim.step() // walk past breakpoint
             } catch (e: Throwable) {
                 runEnd()
@@ -439,7 +467,7 @@ import kotlin.dom.removeClass
                 cycles++
             }
 
-            timer = window.setTimeout(Driver::runStart, TIMEOUT_TIME, useBreakPoints)
+            timer = setTimeout(Driver::runStart, TIMEOUT_TIME, useBreakPoints)
         } catch (e: Throwable) {
             runEnd()
             handleError("RunStart", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
@@ -451,7 +479,7 @@ import kotlin.dom.removeClass
         Renderer.updatePC(sim.getPC())
         Renderer.updateAll()
         Renderer.setRunButtonSpinning(false)
-        timer?.let(window::clearTimeout)
+        timer?.let(::clearTimeout)
         timer = null
     }
 
@@ -623,7 +651,13 @@ import kotlin.dom.removeClass
         return sb.toString()
     }
 
+    /**
+     * DEPRECATED
+     * Not implemented
+     * This did copy instruction codes into a text area
+     */
     @JsName("dump") fun dump() {
+        /*
         try {
             Renderer.clearConsole()
             Renderer.printConsole(getInstructionDump())
@@ -637,6 +671,7 @@ import kotlin.dom.removeClass
         } catch (e: Throwable) {
             handleError("dump", e)
         }
+         */
     }
 
     @JsName("setOnlyEcallExit") fun setOnlyEcallExit(b: Boolean) {
@@ -658,10 +693,10 @@ import kotlin.dom.removeClass
                     var i = userStringToInt(input.value)
                     try {
                         MemorySegments.setTextBegin(i)
-                        val tabDisplay = document.getElementById("simulator-tab") as HTMLElement
-                        if (tabDisplay.classList.contains("is-active")) {
+                        // val tabDisplay = document.getElementById("simulator-tab") as HTMLElement
+                        // if (tabDisplay.classList.contains("is-active")) {
                             openSimulator()
-                        }
+                        // }
                     } catch (e: SimulatorError) {
                         console.warn(e.toString())
                     }
@@ -847,18 +882,18 @@ import kotlin.dom.removeClass
             val purlinput = document.getElementById("package-url-val") as HTMLInputElement
             val url = purlinput.value
             ScriptManager.addPackage(url)
-            window.setTimeout(Driver::packageLoaded, 100, button)
+            setTimeout(Driver::packageLoaded, 100, button)
         } else {
             console.log("Cannot add a new package until the previous package has finished!")
         }
     }
 
     @JsName("togglePackage") fun togglePackage(packageID: String) {
-        window.setTimeout(ScriptManager::togglePackage, TIMEOUT_TIME, packageID)
+        setTimeout(ScriptManager::togglePackage, TIMEOUT_TIME, packageID)
     }
 
     @JsName("removePackage") fun removePackage(packageID: String) {
-        window.setTimeout(ScriptManager::removePackage, TIMEOUT_TIME, packageID)
+        setTimeout(ScriptManager::removePackage, TIMEOUT_TIME, packageID)
     }
 
     fun packageLoaded(b: HTMLButtonElement) {
@@ -866,13 +901,13 @@ import kotlin.dom.removeClass
             b.removeClass("is-loading")
             return
         }
-        window.setTimeout(Driver::packageLoaded, 100, b)
+        setTimeout(Driver::packageLoaded, 100, b)
     }
 
     @JsName("trace") fun trace() {
         if (trTimer != null) {
             Renderer.setNameButtonSpinning("simulator-trace", false)
-            trTimer?.let(window::clearTimeout)
+            trTimer?.let(::clearTimeout)
             trTimer = null
             tr.traceFullReset()
             sim.reset()
@@ -882,7 +917,7 @@ import kotlin.dom.removeClass
         Renderer.setNameButtonSpinning("simulator-trace", true)
         Renderer.clearConsole()
         loadTraceSettings()
-        trTimer = window.setTimeout(Driver::traceSt, TIMEOUT_TIME)
+        trTimer = setTimeout(Driver::traceSt, TIMEOUT_TIME)
     }
 
     private fun loadTraceSettings() {
@@ -895,7 +930,7 @@ import kotlin.dom.removeClass
         wordAddressed = (document.getElementById("tPCWAddr") as HTMLButtonElement).value == "true"
     }
 
-    var trTimer: Int? = null
+    var trTimer: Timeout? = null
     internal fun traceSt() {
         try {
             tr.traceStart()
@@ -903,7 +938,7 @@ import kotlin.dom.removeClass
         } catch (e: Throwable) {
             handleError("Trace tr Start", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
             Renderer.setNameButtonSpinning("simulator-trace", false)
-            trTimer?.let(window::clearTimeout)
+            trTimer?.let(::clearTimeout)
             trTimer = null
         }
     }
@@ -913,22 +948,22 @@ import kotlin.dom.removeClass
             var cycles = 0
             while (cycles < TIMEOUT_CYCLES) {
                 if (sim.isDone()) {
-                    trTimer = window.setTimeout(Driver::runTrEnd, TIMEOUT_TIME)
+                    trTimer = setTimeout(Driver::runTrEnd, TIMEOUT_TIME)
                     return
                 }
                 try {
                     tr.traceStep()
                 } catch (err: SimulatorError) {
-                    trTimer = window.setTimeout(Driver::runTrEnd, TIMEOUT_TIME, err)
+                    trTimer = setTimeout(Driver::runTrEnd, TIMEOUT_TIME, err)
                     return
                 }
                 cycles++
             }
-            trTimer = window.setTimeout(Driver::traceLoop, TIMEOUT_TIME)
+            trTimer = setTimeout(Driver::traceLoop, TIMEOUT_TIME)
         } catch (e: Throwable) {
             handleError("Trace tr Loop", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
             Renderer.setNameButtonSpinning("simulator-trace", false)
-            trTimer?.let(window::clearTimeout)
+            trTimer?.let(::clearTimeout)
             trTimer = null
         }
     }
@@ -939,11 +974,11 @@ import kotlin.dom.removeClass
                 tr.traceAddError(err)
             }
             tr.traceStringStart()
-            trTimer = window.setTimeout(Driver::traceStringLoop, TIMEOUT_TIME)
+            trTimer = setTimeout(Driver::traceStringLoop, TIMEOUT_TIME)
         } catch (e: Throwable) {
             handleError("Trace Tr End", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
             Renderer.setNameButtonSpinning("simulator-trace", false)
-            trTimer?.let(window::clearTimeout)
+            trTimer?.let(::clearTimeout)
             trTimer = null
         }
     }
@@ -953,15 +988,15 @@ import kotlin.dom.removeClass
         var cycles = 0
         while (cycles < TIMEOUT_CYCLES) {
             if (!tr.traceStringStep()) {
-                trTimer = window.setTimeout(Driver::traceStringEnd, TIMEOUT_TIME)
+                trTimer = setTimeout(Driver::traceStringEnd, TIMEOUT_TIME)
                 return
             }
         }
-            trTimer = window.setTimeout(Driver::traceStringLoop, TIMEOUT_TIME)
+            trTimer = setTimeout(Driver::traceStringLoop, TIMEOUT_TIME)
         } catch (e: Throwable) {
             handleError("Trace String Loop", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
             Renderer.setNameButtonSpinning("simulator-trace", false)
-            trTimer?.let(window::clearTimeout)
+            trTimer?.let(::clearTimeout)
             trTimer = null
         }
     }
@@ -975,7 +1010,7 @@ import kotlin.dom.removeClass
             handleError("Trace String End", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
         }
         Renderer.setNameButtonSpinning("simulator-trace", false)
-        trTimer?.let(window::clearTimeout)
+        trTimer?.let(::clearTimeout)
         trTimer = null
     }
 
@@ -984,12 +1019,12 @@ import kotlin.dom.removeClass
         Renderer.setNameButtonSpinning("simulator-trace", true)
         Renderer.clearConsole()
         this.loadTraceSettings()
-        window.setTimeout(Driver::traceStart, TIMEOUT_TIME)
+        setTimeout(Driver::traceStart, TIMEOUT_TIME)
     }*/
     internal fun traceStart() {
         try {
             tr.trace()
-            window.setTimeout(Driver::traceString, TIMEOUT_TIME)
+            setTimeout(Driver::traceString, TIMEOUT_TIME)
         } catch (e: Throwable) {
             handleError("Trace Start", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
             Renderer.setNameButtonSpinning("simulator-trace", false)
@@ -1027,7 +1062,7 @@ import kotlin.dom.removeClass
     fun saveIntervalFn() {
         if (useLS) {
             blinkSave(true)
-            window.setTimeout(Driver::blinkSave, 500, false)
+            setTimeout(Driver::blinkSave, 500, false)
             saveAll()
         }
     }
@@ -1267,9 +1302,9 @@ import kotlin.dom.removeClass
                 this.driver_complete_loading = true
                 return
             }
-            window.setTimeout(fun () { checkToSetTab() }, 10)
+            setTimeout(fun () { checkToSetTab() }, 10)
         }
-        window.setTimeout(fun () { checkToSetTab() }, 10)
+        setTimeout(fun () { checkToSetTab() }, 10)
         js("codeMirror.refresh();")
     }
 
@@ -1308,7 +1343,7 @@ import kotlin.dom.removeClass
 
     fun editVFObjectfromObj(obj: VFSObject) {
         if (obj.type !== VFSType.File) {
-            window.alert("Only files can be loaded into the editor.")
+            console.warn("Only files can be loaded into the editor.")
             return
         }
         try {
@@ -1321,7 +1356,7 @@ import kotlin.dom.removeClass
             activeFileinEditor = obj.getPath()
         } catch (e: Throwable) {
             console.error(e)
-            window.alert("Could not load file to the editor!")
+            console.warn("Could not load file to the editor!")
         }
     }
 
@@ -1338,15 +1373,15 @@ import kotlin.dom.removeClass
         val txt: String
         try {
             js("codeMirror.save();")
-            txt = this.getText()
+            txt = getText()
         } catch (e: Throwable) {
             console.error(e)
-            window.alert("Could not save file!")
+            console.warn("Could not save file!")
             return
         }
         if (save) {
             if (obj.type != VFSType.File) {
-                window.alert("You can (currently) only save to files!")
+                console.warn("You can (currently) only save to files!")
                 return
             }
             var file = obj as VFSFile
