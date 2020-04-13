@@ -45,7 +45,7 @@ task ktlint(type: JavaExec) {
     description = "Check Kotlin code style."
     main = "com.github.shyiko.ktlint.Main"
     classpath = configurations.ktlint
-    args "--verbose", "src/**/*.kt"
+    args "--verbose", "!src/**/*.kt"
 }
 
 check.dependsOn ktlint
@@ -54,7 +54,7 @@ task ktlintFormat(type: JavaExec) {
     description = "Fix Kotlin code style deviations."
     main = "com.github.shyiko.ktlint.Main"
     classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
+    args "-F", "!src/**/*.kt"
 }
 
 dokka {
