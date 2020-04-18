@@ -17,17 +17,18 @@ import venusbackend.simulator.cache.ChangedBlockState
 //import kotlin.browser.document
 //import kotlin.browser.window
 //import kotlin.dom.addClass
-import kotlin.dom.removeClass
 
-/* ktlint-enable no-wildcard-imports */
-
+external fun require(module: String): dynamic
 /**
  * This singleton is used to render different parts of the screen, it serves as an interface between the UI and the
  * internal simulator.
  *
  * @todo break this up into multiple objects
  */
-internal object Renderer : IRenderer {
+internal object Renderer : IRenderer  {
+
+    @JsName("emitter") private var eventEmitter: dynamic = null
+
     override val MEMORY_CONTEXT = 6
     override var pkgmsgTimeout: Int? = 0
     override val hexMap: List<Char> = listOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -38,4 +39,21 @@ internal object Renderer : IRenderer {
     override var sim: Simulator = Simulator(LinkedProgram(), VirtualFileSystem("dummy"))
     override var displayType = "hex"
     override var mainTabs: ArrayList<String> = arrayListOf("simulator", "editor", "venus")
+
+    @JsName("setEmitter") fun setEmitter(emitter: dynamic) {
+        this.eventEmitter = emitter
+    }
+    override fun displayWarning(w: String){
+        eventEmitter.emit("warning", w)
+    }
+
+    /** Display a given ERROR */
+    override fun displayError(thing: Any) {
+        eventEmitter.emit("error", thing)
+    }
+
+    /** Display a given [AssemblerError] */
+    override fun displayAssemblerError(e: AssemblerError) {
+        eventEmitter.emit("assembler_error", e)
+    }
 }
