@@ -40,20 +40,35 @@ internal object Renderer : IRenderer  {
     override var displayType = "hex"
     override var mainTabs: ArrayList<String> = arrayListOf("simulator", "editor", "venus")
 
-    @JsName("setEmitter") fun setEmitter(emitter: dynamic) {
-        this.eventEmitter = emitter
+    /** Sets the emitter for this Renderer, if it is not already set. Returns the active emitter.  */
+    @JsName("setEmitter") fun setEmitter(emitter: dynamic): dynamic {
+        if (this.eventEmitter == null) {
+            this.eventEmitter = emitter
+        }
+
+        return this.eventEmitter
     }
+
     override fun displayWarning(w: String){
-        eventEmitter.emit("warning", w)
+        eventEmitter?.emit("warning", w)
     }
 
     /** Display a given ERROR */
     override fun displayError(thing: Any) {
-        eventEmitter.emit("error", thing)
+        eventEmitter?.emit("error", thing)
     }
 
     /** Display a given [AssemblerError] */
     override fun displayAssemblerError(e: AssemblerError) {
-        eventEmitter.emit("assembler_error", e)
+        eventEmitter?.emit("assembler_error", e)
     }
+
+    override fun stdout(thing: Any) {
+        eventEmitter?.emit("stdout", thing)
+    }
+
+    override fun printConsole(thing: Any) {
+        eventEmitter.emit("console", thing)
+    }
+
 }

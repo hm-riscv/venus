@@ -384,7 +384,6 @@ external val document: Document
     @JsName("externalAssemble") fun externalAssemble(text: String, absPath: String = ""): Any {
         var success = true
         var errs = ""
-        var sim = js("undefined;")
         val (prog, errors, warnings) = Assembler.assemble(text, abspath = absPath)
         if (errors.isNotEmpty()) {
             errs = errors.first().toString()
@@ -394,13 +393,18 @@ external val document: Document
                 val PandL = ProgramAndLibraries(listOf(prog), VFS)
                 val linked = Linker.link(PandL)
                 sim = Simulator(linked, VFS, simSettings)
+                val args = Lexer.lex(getDefaultArgs())
+                for (arg in args) {
+                    sim.addArg(arg)
+                }
+                setCacheSettings()
             } catch (e: AssemblerError) {
                 errs = e.toString()
                 success = false
             }
         }
 
-        return js("[success, sim, errs, warnings]")
+        return js("[success, errs, warnings]")
     }
 
     /**

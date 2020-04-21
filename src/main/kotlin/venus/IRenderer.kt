@@ -118,7 +118,7 @@ interface IRenderer {
     }
 
     fun stderr(thing: Any) {
-        
+        displayError(thing)
     }
 
     /** Display a given [AssemblerError] */
