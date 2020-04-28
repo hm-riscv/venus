@@ -381,10 +381,10 @@ external val document: Document
         }
     }
 
-    @JsName("externalAssemble") fun externalAssemble(text: String, absPath: String = ""): Any {
+    @JsName("externalAssemble") fun externalAssemble(text: String, absPath: String = "", fileName: String = "main.s"): Any {
         var success = true
         var errs = ""
-        val (prog, errors, warnings) = Assembler.assemble(text, abspath = absPath)
+        val (prog, errors, warnings) = Assembler.assemble(text, abspath = absPath, name = fileName)
         if (errors.isNotEmpty()) {
             errs = errors.first().toString()
             success = false

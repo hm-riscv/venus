@@ -68,7 +68,7 @@ internal object Renderer : IRenderer  {
     }
 
     override fun printConsole(thing: Any) {
-        eventEmitter.emit("console", thing)
+        eventEmitter?.emit("printConsole", thing)
     }
 
 }
