@@ -146,6 +146,24 @@ external val document: Document
         return (document.getElementById("ArgsList") as HTMLInputElement).value
     }
 
+    data class InstructionInfo(val pc: Int, val mcode: MachineCode, val basicCode: String, val line: Int)
+
+    @JsName("getInstructions") fun getIntructions(): Array<InstructionInfo> {
+        val instructions: MutableList<InstructionInfo> = mutableListOf()
+        for (i in 0 until sim.linkedProgram.prog.insts.size) {
+            val programDebug = sim.linkedProgram.dbg[i]
+            val (_, dbg) = programDebug
+            val (_, line) = dbg
+            val lineNo = dbg.lineNo
+            val mcode = sim.linkedProgram.prog.insts[i]
+            val pc = sim.instOrderMapping[i]!!
+            val basicCode = Instruction[mcode].disasm(mcode)
+            instructions.add(InstructionInfo(pc, mcode, basicCode, lineNo))
+        }
+
+        return instructions.toTypedArray()
+    }
+
     @JsName("assembleSimulator") fun assembleSimulator() {
         var text = getText()
         if (text == "") {
