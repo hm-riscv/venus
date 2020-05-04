@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/ThaumicMekanism/venus#readme",
   "devDependencies": {
-    "grunt": "^1.0.1",
+    "grunt": "1.0.4",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-cssmin": "^2.2.0",
     "grunt-contrib-htmlmin": "^2.4.0",
