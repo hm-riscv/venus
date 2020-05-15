@@ -146,7 +146,22 @@ external val document: Document
         return (document.getElementById("ArgsList") as HTMLInputElement).value
     }
 
-    data class InstructionInfo(val pc: Int, val mcode: MachineCode, val basicCode: String, val line: Int)
+    data class InstructionInfo(val pc: Int, val mcode: Int, val basicCode: String, val line: Int)
+    data class DebugInfo(val pc: Int, val mcode: Int, val basicCode: String, val line: Int, val sourceFile: String)
+    @JsName("getCurrentInstruction") fun getCurrentInstruction(): DebugInfo{
+        for (i in 0 until sim.linkedProgram.prog.insts.size) {
+            val programDebug = sim.linkedProgram.dbg[i]
+            val (_, dbg) = programDebug
+            if (dbg.address == sim.getPC().toInt()) {
+                val mc = sim.linkedProgram.prog.insts[i]
+                val pc = sim.instOrderMapping[i]!!
+                val basicCode = Instruction[mc].disasm(mc)
+                val mcode = mc[InstructionField.ENTIRE].toInt()
+                return DebugInfo(sim.getPC().toInt(), mcode, basicCode, dbg.lineNo, dbg.prog.absPath)
+            }
+        }
+        return DebugInfo(0, 0, "failure", 0, "unknown")
+    }
 
     @JsName("getInstructions") fun getIntructions(): Array<InstructionInfo> {
         val instructions: MutableList<InstructionInfo> = mutableListOf()
@@ -155,9 +170,10 @@ external val document: Document
             val (_, dbg) = programDebug
             val (_, line) = dbg
             val lineNo = dbg.lineNo
-            val mcode = sim.linkedProgram.prog.insts[i]
+            val mc = sim.linkedProgram.prog.insts[i]
             val pc = sim.instOrderMapping[i]!!
-            val basicCode = Instruction[mcode].disasm(mcode)
+            val basicCode = Instruction[mc].disasm(mc)
+            val mcode = mc[InstructionField.ENTIRE].toInt()
             instructions.add(InstructionInfo(pc, mcode, basicCode, lineNo))
         }
 
@@ -392,9 +408,9 @@ external val document: Document
         if (sim.exitcode != null) {
             val msg = "Exited with error code ${sim.exitcode}"
             if (sim.exitcode ?: 0 == 0) {
-                console.log(msg)
+                Renderer.stdout(msg)
             } else {
-                console.warn(msg)
+                Renderer.displayWarning(msg)
             }
         }
     }
@@ -512,12 +528,20 @@ external val document: Document
         try {
             val diffs = sim.step()
             handleNotExitOver()
-            Renderer.updateFromDiffs(diffs)
-            Renderer.updateCache(Address(0, MemSize.WORD))
-            Renderer.updateControlButtons()
             exitcodecheck()
         } catch (e: Throwable) {
             handleError("step", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
+        }
+    }
+
+    /**
+     * Runs the simulator for one step and renders any updates.
+     */
+    @JsName("isFinished") fun isFinished(): Boolean {
+        if (sim.exitcode != null) {
+            return true
+        } else {
+            return false
         }
     }
 
