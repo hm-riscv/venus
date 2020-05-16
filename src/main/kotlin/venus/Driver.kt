@@ -146,18 +146,18 @@ external val document: Document
         return (document.getElementById("ArgsList") as HTMLInputElement).value
     }
 
-    data class InstructionInfo(val pc: Int, val mcode: Int, val basicCode: String, val line: Int)
+    data class InstructionInfo(val pc: Int, val mcode: Int, val basicCode: String, val line: Int, val sourceFile: String)
     data class DebugInfo(val pc: Int, val mcode: Int, val basicCode: String, val line: Int, val sourceFile: String)
     @JsName("getCurrentInstruction") fun getCurrentInstruction(): DebugInfo{
         for (i in 0 until sim.linkedProgram.prog.insts.size) {
             val programDebug = sim.linkedProgram.dbg[i]
             val (_, dbg) = programDebug
-            if (dbg.address == sim.getPC().toInt()) {
+            val pc = sim.instOrderMapping[i]!!
+            if (pc == sim.getPC().toInt()) {
                 val mc = sim.linkedProgram.prog.insts[i]
-                val pc = sim.instOrderMapping[i]!!
                 val basicCode = Instruction[mc].disasm(mc)
                 val mcode = mc[InstructionField.ENTIRE].toInt()
-                return DebugInfo(sim.getPC().toInt(), mcode, basicCode, dbg.lineNo, dbg.prog.absPath)
+                return DebugInfo(pc, mcode, basicCode, dbg.lineNo, dbg.prog.absPath)
             }
         }
         return DebugInfo(0, 0, "failure", 0, "unknown")
@@ -174,7 +174,7 @@ external val document: Document
             val pc = sim.instOrderMapping[i]!!
             val basicCode = Instruction[mc].disasm(mc)
             val mcode = mc[InstructionField.ENTIRE].toInt()
-            instructions.add(InstructionInfo(pc, mcode, basicCode, lineNo))
+            instructions.add(InstructionInfo(pc, mcode, basicCode, lineNo, dbg.prog.absPath))
         }
 
         return instructions.toTypedArray()
