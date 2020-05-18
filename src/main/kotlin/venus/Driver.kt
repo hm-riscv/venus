@@ -461,17 +461,19 @@ external val document: Document
 
     @JsName("continue") fun continueRun() {
         try {
+            if (!sim.isDone()) {
+                handleNotExitOver()
+                sim.step()
+            }
             while (true) {
                 if (sim.isDone() || (sim.atBreakpoint())) {
                     exitcodecheck()
                     runEnd()
-                    Renderer.updateAll()
                     return
                 }
 
                 handleNotExitOver()
                 sim.step()
-                Renderer.updateCache(Address(0, MemSize.WORD))
             }
         } catch (e: Throwable) {
             runEnd()
