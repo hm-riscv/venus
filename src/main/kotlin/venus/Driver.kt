@@ -459,7 +459,7 @@ external val document: Document
         }
     }
 
-    @JsName("continue") fun continue() {
+    @JsName("continue") fun continueRun() {
         try {
             while (true) {
                 if (sim.isDone() || (sim.atBreakpoint())) {
