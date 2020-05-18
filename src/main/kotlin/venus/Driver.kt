@@ -459,6 +459,26 @@ external val document: Document
         }
     }
 
+    @JsName("continue") fun continue() {
+        try {
+            while (true) {
+                if (sim.isDone() || (sim.atBreakpoint())) {
+                    exitcodecheck()
+                    runEnd()
+                    Renderer.updateAll()
+                    return
+                }
+
+                handleNotExitOver()
+                sim.step()
+                Renderer.updateCache(Address(0, MemSize.WORD))
+            }
+        } catch (e: Throwable) {
+            runEnd()
+            handleError("RunStart", e, e is AlignmentError || e is StoreError || e is ExceededAllowedCyclesError)
+        }
+    }
+
     /**
      * Resets the simulator to its initial state
      */
