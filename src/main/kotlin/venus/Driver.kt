@@ -147,20 +147,16 @@ external val document: Document
     }
 
     data class InstructionInfo(val pc: Int, val mcode: Int, val basicCode: String, val line: Int, val sourceFile: String)
-    data class DebugInfo(val pc: Int, val mcode: Int, val basicCode: String, val line: Int, val sourceFile: String)
-    @JsName("getCurrentInstruction") fun getCurrentInstruction(): DebugInfo{
-        for (i in 0 until sim.linkedProgram.prog.insts.size) {
-            val programDebug = sim.linkedProgram.dbg[i]
-            val (_, dbg) = programDebug
-            val pc = sim.instOrderMapping[i]!!
-            if (pc == sim.getPC().toInt()) {
-                val mc = sim.linkedProgram.prog.insts[i]
-                val basicCode = Instruction[mc].disasm(mc)
-                val mcode = mc[InstructionField.ENTIRE].toInt()
-                return DebugInfo(pc, mcode, basicCode, dbg.lineNo, dbg.prog.absPath)
-            }
+    @JsName("getCurrentInstruction") fun getCurrentInstruction(): InstructionInfo{
+//            val pcloc = (sim.getMaxPC().toInt() - MemorySegments.TEXT_BEGIN)
+        val pcloc = sim.getPC().toInt()
+        var mcode = MachineCode(0)
+        try {
+            mcode = sim.getNextInstruction()
+            return InstructionInfo(pcloc, mcode[InstructionField.ENTIRE].toInt(), Instruction[mcode].disasm(mcode), 0, "");
+        } catch (e: SimulatorError) {
+            return InstructionInfo(0, 0, "error", 0, "error")
         }
-        return DebugInfo(0, 0, "failure", 0, "unknown")
     }
 
     @JsName("getInstructions") fun getIntructions(): Array<InstructionInfo> {
