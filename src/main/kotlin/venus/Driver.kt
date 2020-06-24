@@ -215,6 +215,22 @@ external val document: Document
         }
     }
 
+    @JsName("getRegister") fun getRegister(id: Int): Number {
+        return sim.getReg(id)
+    }
+
+    @JsName("getFRegister") fun getFRegister(id: Int): Decimal {
+        return sim.getFReg(id)
+    }
+
+    @JsName("setRegister") fun setRegister(id: Int, value: Number) {
+        return sim.setReg(id, value)
+    }
+
+    @JsName("setFRegister") fun setFRegister(id: Int, value: Decimal) {
+        return sim.setFReg(id, value)
+    }
+
     /**
      * DEPRECATED
      * no operation
