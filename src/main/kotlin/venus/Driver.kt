@@ -227,8 +227,9 @@ external val document: Document
         return sim.setReg(id, value)
     }
 
-    @JsName("setFRegister") fun setFRegister(id: Int, value: Decimal) {
-        return sim.setFReg(id, value)
+    @JsName("setFRegister") fun setFRegister(id: Int, value: Number) {
+        
+        return sim.setFReg(id, Decimal(value.toFloat(), value.toDouble(), false))
     }
 
     /**
