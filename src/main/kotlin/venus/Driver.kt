@@ -236,7 +236,7 @@ external val document: Document
     @JsName("setFRegister") fun setFRegister(id: Int, value: Number) {
         if (!currentlyRunning()) {
             try {
-                sim.setFRegNoUndo(id, Decimal(value.toFloat(), value.toDouble(), false))
+                sim.setFRegNoUndo(id, Decimal(value.toFloat(), value.toDouble(), FReginputAsFloat))
             } catch (e: NumberFormatException) {
                 /* do nothing */
             }
