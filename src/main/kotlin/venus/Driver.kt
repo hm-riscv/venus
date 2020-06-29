@@ -224,12 +224,23 @@ external val document: Document
     }
 
     @JsName("setRegister") fun setRegister(id: Int, value: Number) {
-        return sim.setReg(id, value)
+        if (!currentlyRunning()) {
+            try {
+                sim.setRegNoUndo(id, value)
+            } catch (e: NumberFormatException) {
+                /* do nothing */
+            }
+        }
     }
 
     @JsName("setFRegister") fun setFRegister(id: Int, value: Number) {
-        
-        return sim.setFReg(id, Decimal(value.toFloat(), value.toDouble(), false))
+        if (!currentlyRunning()) {
+            try {
+                sim.setFRegNoUndo(id, Decimal(value.toFloat(), value.toDouble(), false))
+            } catch (e: NumberFormatException) {
+                /* do nothing */
+            }
+        }
     }
 
     /**
