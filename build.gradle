@@ -14,13 +14,11 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 
 apply plugin: 'kotlin2js'
 apply plugin: 'kotlin-dce-js'
-apply plugin: 'kotlinx-serialization'
 apply plugin: 'org.jetbrains.dokka'
 
 runDceKotlinJs.keep 'venus.Driver.run', 'venusbackend.assembler.Linter', 'venus.api.API', "kotlin.Number"
@@ -69,6 +67,5 @@ dependencies {
     ktlint "com.github.shyiko:ktlint:$ktlint_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
 }
