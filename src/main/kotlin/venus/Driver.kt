@@ -159,6 +159,11 @@ external val document: Document
         }
     }
 
+    @JsName("RegisterEcallReceiver")
+    fun RegisterEcallReceiver(receiverFunction: (String) -> Unit) {
+        sim.registerEcallReceiver(receiverFunction)
+    }
+
     @JsName("getInstructions") fun getIntructions(): Array<InstructionInfo> {
         val instructions: MutableList<InstructionInfo> = mutableListOf()
         for (i in 0 until sim.linkedProgram.prog.insts.size) {

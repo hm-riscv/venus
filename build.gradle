@@ -5,6 +5,7 @@ buildscript {
     ext.kotlin_version = '1.3.61'
     ext.dokka_version = '0.10.1'
     ext.ktlint_version = '0.27.0'
+    ext.serialization_version = '0.20.0'
 
     repositories {
         mavenCentral()
@@ -13,11 +14,13 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 
 apply plugin: 'kotlin2js'
 apply plugin: 'kotlin-dce-js'
+apply plugin: 'kotlinx-serialization'
 apply plugin: 'org.jetbrains.dokka'
 
 runDceKotlinJs.keep 'venus.Driver.run', 'venusbackend.assembler.Linter', 'venus.api.API', "kotlin.Number"
@@ -65,5 +68,7 @@ dokka {
 dependencies {
     ktlint "com.github.shyiko:ktlint:$ktlint_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
 }
