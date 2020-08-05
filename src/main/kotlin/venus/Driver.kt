@@ -159,8 +159,8 @@ external val document: Document
         }
     }
 
-    @JsName("RegisterEcallReceiver")
-    fun RegisterEcallReceiver(receiverFunction: (String) -> Unit) {
+    @JsName("registerEcallReceiver")
+    fun registerEcallReceiver(receiverFunction: (String) -> Unit) {
         sim.registerEcallReceiver(receiverFunction)
     }
 
