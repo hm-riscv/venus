@@ -159,9 +159,9 @@ external val document: Document
         }
     }
 
-    @JsName("registerEcallReceiver")
-    fun registerEcallReceiver(receiverFunction: (String) -> Unit) {
-        sim.registerEcallReceiver(receiverFunction)
+    @JsName("registerECallReceiver")
+    fun registerECallReceiver(receiverFunction: (String) -> Unit) {
+        sim.registerECallReceiver(receiverFunction)
     }
 
     @JsName("getInstructions") fun getIntructions(): Array<InstructionInfo> {
