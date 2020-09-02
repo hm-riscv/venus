@@ -780,6 +780,11 @@ external val document: Document
         simSettings.setRegesOnInit = b
     }
 
+    @JsName("setBreakBeforeInstruction")
+    fun setBreakBeforeInstruction(b: Boolean) {
+        simSettings.breakBeforeInstruction = b
+    }
+
     @JsName("verifyText") fun verifyText(input: HTMLInputElement) {
         try {
             if (!currentlyRunning()) {
