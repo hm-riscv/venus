@@ -593,6 +593,14 @@ external val document: Document
         }
     }
 
+     /**
+     * Runs the simulator for one step and renders any updates.
+     */
+    @JsName("handleError") fun handleErr(where: String, error: Throwable) {
+        handleError(where, error, error is AlignmentError || error is StoreError || error is ExceededAllowedCyclesError)
+    }
+
+    @JsName("handleNotExitOver")
     private fun handleNotExitOver() {
         if (sim.settings.ecallOnlyExit &&
                 (sim.getPC().toInt() >= sim.getMaxPC().toInt() || sim.getPC().toInt() < MemorySegments.TEXT_BEGIN)
