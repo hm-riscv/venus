@@ -1,7 +1,7 @@
 CodeMirror.defineMode("riscv", function(config, parserConfig) {
     window.regexFromWords = function (words, ins) {
         return new RegExp("^(?:" + words.join("|") + ")$", ins);
-    }
+    };
 
     var instructions = regexFromWords([
         "(c\.)?addw?",
@@ -164,16 +164,25 @@ CodeMirror.defineMode("riscv", function(config, parserConfig) {
         ".data_start"
     ], "i");
 
+    var preprocessor_directives = ["#define", "#undef", "#if", "#elif", "#else", "#endif", "#ifdef", "#ifndef", "#error", "#import", "#include", "#pragma", "#line", "#using"];
+
     function normal(stream, state) {
         var ch = stream.next();
 
         if (ch == "#") {
+            var line = stream.lookAhead(0);
             stream.skipToEnd();
+            for (var i in preprocessor_directives) {
+                var dir = preprocessor_directives[i];
+                if (line.startsWith(dir)) {
+                    return "meta";
+                }
+            }
             return "comment";
         }
 
         if (ch == "\"" || ch == "'") {
-            state.cur = string(ch)
+            state.cur = string(ch);
             return state.cur(stream, state);
         }
 
@@ -220,7 +229,7 @@ CodeMirror.defineMode("riscv", function(config, parserConfig) {
             if (stream.eatSpace()) return null;
             var style = state.cur(stream, state);
             var word = stream.current();
-            if (style == "variable") {
+            if (style === "variable") {
                 if (keywords.test(word)) style = "keyword";
                 else if (instructions.test(word)) style = "builtin";
                 else if (registers.test(word)) style = "variable-2";
@@ -235,6 +244,13 @@ CodeMirror.defineMode("riscv", function(config, parserConfig) {
                 }
             }
             return style;
+        },
+
+        lineComment: '#',
+
+
+        extraKeys: {
+            'Ctrl-/': function(cm){cm.execCommand('toggleComment')}
         }
     };
 });
@@ -258,7 +274,7 @@ CodeMirror.registerHelper("lint", "riscv", function (text) {
 
     var res = window.venus_main.venus.Driver.lint(text);
     for (var i = 0; i < res.length; i++) {
-        info = res[i]
+        info = res[i];
         if (info.isError) {
             parseError(info);
         } else {
@@ -267,3 +283,4 @@ CodeMirror.registerHelper("lint", "riscv", function (text) {
     }
     return errors;
 });
+

@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 import venus.vfs.VFSFile
 
@@ -16,17 +17,14 @@ var cp = Command(
             if (f is VFSFile) {
                 val text = f.readText()
                 val new_f = VFSFile(f.label, d)
-                new_f.setText(text)
                 new_f.permissions = f.permissions
-                d.addChild(new_f)
+                d.addChild(new_f, text)
             } else {
                 result = "cp: Copy currently only works on files!"
             }
             return result
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = """Copies a text/data file to a new location.
             |Usage: cp [src] [dst]
             |NOTE: This is a very dumb copy. It does not work on folders yet or many files!

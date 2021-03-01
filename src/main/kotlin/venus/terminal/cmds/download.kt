@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 import venus.vfs.VFSDummy
 import venus.vfs.VFSFile
@@ -20,13 +21,7 @@ var download = Command(
             }
             return s.toString()
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size == 1) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        }
+        tab = ::fileTabComplete
 )
 
 fun downloadFile(filename: String, text: String) {

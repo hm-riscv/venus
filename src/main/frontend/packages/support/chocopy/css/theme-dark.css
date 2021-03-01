@@ -1,0 +1,162 @@
+.theme-dark body {
+    height: 100vh;
+    background-color: black;
+    color: #999;
+}
+
+.theme-dark a {
+    color: #53e5ff;
+}
+
+.theme-dark a:hover {
+    color: #ff4ea5;
+}
+
+.theme-dark textarea, .theme-dark select, .theme-dark input[type] {
+    color: #f1f1f1;
+    background-color: #4a4a4a;
+}
+
+.theme-dark ::-webkit-scrollbar { width: 8px; height: 3px;}
+.theme-dark ::-webkit-scrollbar-button {  background-color: #666; }
+.theme-dark ::-webkit-scrollbar-track {  background-color: #646464;}
+.theme-dark ::-webkit-scrollbar-track-piece { background-color: #000;}
+.theme-dark ::-webkit-scrollbar-thumb { height: 50px; background-color: #666; border-radius: 3px;}
+.theme-dark ::-webkit-scrollbar-corner { background-color: #646464;}
+.theme-dark ::-webkit-resizer { background-color: #666;}
+
+
+.theme-dark .ace_gutter {
+    background: #20272b;
+    color: rgb(127,130,132);
+}
+
+.theme-dark .ace_print-margin {
+    width: 1px;
+    background: #e8e8e8;
+}
+
+.theme-dark .ace-github {
+    background-color: #20272b;
+    color: #dddddd;
+}
+
+.theme-dark .ace_cursor {
+    color: #ffffff;
+}
+
+.theme-dark .ace_marker-layer .ace_selection {
+    background: #832563;
+}
+
+.theme-dark .ace_multiselect .ace_selection.ace_start {
+    box-shadow: 0 0 3px 0px #20272b;
+    border-radius: 2px;
+}
+
+.theme-dark .ace_marker-layer .ace_step {
+    background: rgb(198, 219, 174);
+}
+
+.theme-dark .ace_marker-layer .ace_bracket {
+    margin: -1px 0 0 -1px;
+    border: 1px solid #6e7880;
+}
+
+.theme-dark .ace_marker-layer .ace_active-line {
+    background: #464a4d;
+}
+
+.theme-dark .ace_gutter-active-line {
+    background-color: #464a4d;
+}
+
+.theme-dark .ace_marker-layer .ace_selected-word {
+    border: 1px solid #832563;
+}
+
+.theme-dark .ace_fold {
+    background-color: #cc2372;
+    border-color: #dddddd;
+}
+
+.theme-dark .ace_keyword {
+    color: #cc2372;
+}
+
+.theme-dark .ace_constant {
+    color: #0099cd;
+}
+
+.theme-dark .ace_support {
+    color: #0099cd;
+}
+
+.theme-dark .ace_support.ace_constant {
+    color: #0099cd;
+}
+
+.theme-dark .ace_support.ace_type {
+    color: #cc2372;
+}
+
+.theme-dark .ace_storage {
+    color: #cc2372;
+}
+
+.theme-dark .ace_storage.ace_type {
+    color: #cc2372;
+}
+
+.theme-dark .ace_invalid.ace_illegal {
+    text-decoration: underline;
+    font-style: italic;
+    color: #f8f8f8;
+    background-color: #e63525;
+}
+
+.theme-dark .ace_invalid.ace_deprecated {
+    text-decoration: underline;
+    font-style: italic;
+    color: #e63525;
+}
+
+.theme-dark .ace_string {
+    color: #3c66e2;
+}
+
+.theme-dark .ace_string.ace_regexp {
+    color: #3c66e2;
+}
+
+.theme-dark .ace_comment {
+    color: #969896;
+}
+
+.theme-dark .ace_variable {
+    color: #fb8764;
+}
+
+.theme-dark .ace_variable.ace_language {
+    color: #0099cd;
+}
+
+.theme-dark .ace_entity.ace_name {
+    color: #9774cb;
+}
+
+.theme-dark .ace_entity.ace_name.ace_tag {
+    color: #7bcc72;
+}
+
+.theme-dark .ace_markup.ace_heading {
+    color: #264ec5;
+}
+
+.theme-dark .ace_markup.ace_list {
+    color: #c26b2b;
+}
+
+.theme-dark .ace-github.ace_focus .ace_marker-layer .ace_active-line {
+    background: rgba(42, 36, 0, 0.98);
+}

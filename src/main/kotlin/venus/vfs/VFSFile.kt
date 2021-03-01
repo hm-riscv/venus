@@ -1,6 +1,6 @@
 package venus.vfs
 
-class VFSFile(override var label: String, override var parent: VFSObject) : VFSObject {
+class VFSFile(override var label: String, override var parent: VFSObject, override var mountedHandler: VFSMountedDriveHandler? = null) : VFSObject {
     override val type = VFSType.File
     override var contents = HashMap<String, Any>()
     override var permissions = VFSPermissions()
@@ -16,10 +16,18 @@ class VFSFile(override var label: String, override var parent: VFSObject) : VFSO
         contents[innerTxt] = ""
     }
     fun readText(): String {
-        return contents[innerTxt] as String
+        return if (isMounted()) {
+            mountedHandler!!.CMDfileread(path = this.getMountedPath())
+        } else {
+            contents[innerTxt] as String
+        }
     }
     @JsName("setText") fun setText(s: String) {
-        contents[innerTxt] = s
+        if (isMounted()) {
+            mountedHandler!!.CMDfilewrite(path = this.getMountedPath(), data = s)
+        } else {
+            contents[innerTxt] = s
+        }
     }
 
     override fun stringify(): JsonContainer {

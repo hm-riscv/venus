@@ -1,5 +1,5 @@
 language: java
-jdk: oraclejdk12
+jdk: openjdk15
 node_js:
   - '12'
 # Handle git submodules yourself
@@ -9,7 +9,7 @@ git:
 before_install:
 - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
 - git submodule update --init --recursive
-- nvm install 4
+- nvm install node
 - npm install
 - npm install -g grunt-cli
 script:

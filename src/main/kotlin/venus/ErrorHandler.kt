@@ -14,7 +14,8 @@ internal fun handleError(where: String, error: Throwable, h: Boolean = false) {
         false
     }
     if (!(error is SimulatorError && (error.infe != null))) {
-        Renderer.clearConsole()
+//        Renderer.clearConsole()
+        console.error(error)
     } else {
         handled = true
     }
@@ -33,6 +34,7 @@ internal fun handleError(where: String, error: Throwable, h: Boolean = false) {
 
         Driver.LS.lsm = oldlsm
         Driver.useLS = olduseLS
+        Renderer.displayError("\n--------------------\n")
         if (handled) {
             Renderer.displayError("[ERROR] An error has occurred!\n\n")
         } else {

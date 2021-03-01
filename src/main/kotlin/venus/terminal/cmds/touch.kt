@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 
 var touch = Command(
@@ -15,9 +16,7 @@ var touch = Command(
             }
             return result
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = """Creates a text/data file.
             |Usage: touch [filename]
             |NOTE: Does not modify the timestamp at the moment because that is not implemented yet in the VFS.

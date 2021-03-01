@@ -12,15 +12,22 @@ module.exports = function(grunt) {
                 files: {
                     'out/js/venus.js': ['build/kotlin-js-min/main/venus.js'],
                     'out/js/kotlin.js': ['build/kotlin-js-min/main/kotlin.js'],
-                    'out/js/codemirror.js': ['src/main/frontend/js/*.js']
+                    'out/js/codemirror/codemirror.js': ['src/main/frontend/js/codemirror/*.js']
                 }
             }
         },
         cssmin: {
             venus: {
-                files: {
-                    'out/css/venus.css': ['src/main/frontend/css/*.css', "!src/main/frontend/css/alertify/*"]
+                files: [{
+                    'out/css/venus.css': ['src/main/frontend/css/*.css', "!src/main/frontend/css/alertify/*", "!src/main/frontend/css/themes/*"],
+                },
+                {
+                    expand: true,
+                    cwd: 'src/main/frontend/css/themes/',
+                    src: ['*.css'],
+                    dest: 'out/css/themes/',
                 }
+                ]
             }
         },
 

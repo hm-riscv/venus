@@ -13,19 +13,26 @@ function setup_venus() {
                 mode: "riscv",
                 indentUnit: 4,
                 autofocus: true,
-                lint: true
+                lint: true,
+                autoRefresh:true,
             }
         );
+        if (window.CodeMirror.mac) { // This uses a custom codemirror which exposes this check.
+            codeMirror.addKeyMap({"Cmd-/": function(cm){cm.execCommand('toggleComment')}})
+        } else {
+            codeMirror.addKeyMap({"Ctrl-/": function(cm){cm.execCommand('toggleComment')}})
+        }
         window.codeMirror.setSize("100%", "88vh");
-        window.codeMirror.refresh()
     } catch (e) {
+        console.error(e);
         load_error(e.toString())
     }
 }
 
 function local_riscv() {
-    load_update_message("Loading required file (local): js/risc-mode.js");
-    loadScript("js/risc-mode.js", "var msg='COULD NOT LOAD RISCVMODE SCRIPT!';load_error(msg);", "local_kotlin();");
+    load_update_message("Loading stylesheets!");
+    load_update_message("Loading required file (local): js/codemirror/risc-mode.js");
+    loadScript("js/codemirror/risc-mode.js", "var msg='COULD NOT LOAD RISCVMODE SCRIPT!';load_error(msg);", "local_kotlin();");
 }
 
 function local_kotlin() {
@@ -87,7 +94,41 @@ window.load_done = function () {
 };
 
 function load_update_message(msg) {
-    document.getElementById("load-msg").innerHTML = msg.replace(/\n/g, "<br>");
+    elm = document.getElementById("load-msg");
+    if (elm === null) {
+        msg = "Could not update the load message to: " + msg;
+        load_error(msg);
+        console.error(msg);
+        return
+    }
+    elm.innerHTML = msg.replace(/\n/g, "<br>");
+}
+
+async function isUrlFound(url) {
+    try {
+        const response = await fetch(url, {
+            method: 'HEAD',
+            cache: 'no-cache'
+        });
+
+        return response.status === 200;
+
+    } catch(error) {
+        // console.log(error);
+        return false;
+    }
+}
+
+function addCss(fileName) {
+
+    var head = document.head;
+    var link = document.createElement("link");
+
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = fileName;
+
+    head.appendChild(link);
 }
 
 function load_error_fn(message, source, lineno, colno, error) {
@@ -116,3 +157,67 @@ alertify.prompt()
     });
 
 main_venus();
+
+
+
+// function dark() {
+//     document.getElementById("venus_theme").href = "css/themes/venus_dark.css";
+//     codeMirror.setOption("theme", "ayu-dark");
+// }
+//
+// function light() {
+//     document.getElementById("venus_theme").href = "css/themes/venus.css";
+//     codeMirror.setOption("theme", "default");
+// }
+//
+// function get_theme() {
+//     return localStorage.getItem("venus_theme");
+// }
+//
+// function set_theme(theme) {
+//     return localStorage.setItem("venus_theme", theme);
+// }
+//
+// function toggle_theme() {
+//     is_dark = get_theme() === "dark";
+//     if (is_dark) {
+//         set_theme("light");
+//         light();
+//     } else {
+//         set_theme("dark");
+//         dark();
+//     }
+// }
+//
+// function setup_theme() {
+//     var thm = get_theme();
+//     if (thm === undefined || thm == null) {
+//         console.log("No theme selected! Setting to...");
+//         try {
+//             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+//                 console.log("dark!");
+//                 set_theme("dark");
+//             } else {
+//                 console.log("light!");
+//                 set_theme("light");
+//             }
+//         } catch (e) {
+//             console.log("Error!");
+//             console.log(e);
+//             console.log("Light!");
+//             set_theme("light");
+//         }
+//     }
+//     if (get_theme() === "dark") {
+//         dark();
+//         document.getElementById('themeSwitch').click();
+//     }
+//     if (get_theme() === "light") {
+//         // Pass
+//     }
+//
+//     document.getElementById('themeSwitch').addEventListener('change', function(event){
+//         toggle_theme();
+//     });
+// }
+

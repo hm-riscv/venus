@@ -133,6 +133,11 @@ body {
 #settings-tab-view {
     display: block;
 }
+
+#calling-convention-settings-tab-view {
+    display: none;
+}
+
 #tracer-settings-tab-view {
     display: none;
 }
@@ -268,4 +273,12 @@ body {
     content: "";
     border-top: 2px solid #ccc;
     padding-top: 2px;
+}
+
+#display-settings {
+
+}
+
+#extern-link {
+    color: black;
 }

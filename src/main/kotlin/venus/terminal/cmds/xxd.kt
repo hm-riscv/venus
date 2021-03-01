@@ -2,6 +2,7 @@ package venus.terminal.cmds
 
 import venus.Renderer
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 import venus.vfs.VFSFile
 
@@ -57,13 +58,7 @@ var xxd = Command(
             }
             return result
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size > 0) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = """Takes a file and prints it out in hex.
             |Usage: xxd file
             |NOTE: This is a very dumb xxd and does not have full features.

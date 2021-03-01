@@ -15,12 +15,17 @@
 	console.log("----------DO NOT WORRY ABOUT THE GET ERRORS BELOW!----------");
   </script>
   <title>venus</title>
+  <link rel="stylesheet" type="text/css" href="css/venus.css">
   <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/switch.css">
   <link rel="stylesheet" type="text/css" href="css/bulma.css">
   <link rel="stylesheet" type="text/css" href="css/codemirror.css">
-  <link rel="stylesheet" type="text/css" href="css/venus.css">
+  <link rel="stylesheet" type="text/css" href="css/themes/venus.css">
+  <link rel="stylesheet" type="text/css" href="css/themes/venus_dark.css">
   <link rel="stylesheet" type="text/css" href="css/alertify/alertify.min.css">
   <link rel="stylesheet" type="text/css" href="css/alertify/default.min.css">
+  <link rel="stylesheet" type="text/css" href="css/themes/ayu-dark.css">
+  <link rel="stylesheet" type="text/css" href="css/dialog.css">
   <link rel="icon" href="images/favicon.png">
 
   <link href="css/Inconsolata.css" rel="stylesheet" type="text/css" />
@@ -68,14 +73,14 @@
                   <li id="venus-terminal-tab" class="is-active"><a onclick="driver.openVenusTab('venus-terminal');">Terminal</a></li>
                   <li id="venus-files-tab"><a onclick="driver.openVenusTab('venus-files');">Files</a></li>
                   <li id="venus-url-tab"><a onclick="driver.openVenusTab('venus-url');">URL</a></li>
-                  <li><a href="https://github.com/ThaumicMekanism/venus/wiki" target="_blank" style="color:black;">Wiki</a></li>
+                  <li><a href="https://github.com/ThaumicMekanism/venus/wiki" target="_blank" class="extern-link">Wiki</a></li>
                   <li id="venus-jvm-tab"><a onclick="driver.openVenusTab('venus-jvm');">JVM</a></li>
                 </ul>
               </div>
             </article>
           </div>
         </div>
-        <div class="tile">
+        <div class="tile" id="venus-body-tab-view">
           <div class="tile is-parent">
             <article class="tile is-child is-primary">
               <div id="venus-terminal-tab-view">
@@ -199,6 +204,7 @@
                 <nav id="settings-tab-view" class="panel">
                   <p class="panel-tabs">
                     <a id="general-settings-tab" onclick="driver.openGeneralSettingsTab()" class="is-active">General</a>
+                    <a id="calling-convention-settings-tab" onclick="driver.openCallingConventionSettingsTab()">Calling Convention</a>
                     <a id="tracer-settings-tab" onclick="driver.openTracerSettingsTab()">Tracer</a>
                     <a id="packages-tab" onclick="driver.openPackagesTab()">Packages</a>
                   </p>
@@ -220,6 +226,16 @@
                         </div>
                         <div class="field-body is-expanded">
                           <input id="text-start" class="input" onblur="driver.verifyText(this)" spellcheck="false">
+                        </div>
+                      </div>
+                    </div>
+                    <div id="maxHistory" class="panel-block">
+                      <div class="field is-horizontal">
+                        <div class="field-label">
+                          <label class="label is-small" for="text-start">Max History</label>
+                        </div>
+                        <div class="field-body is-expanded">
+                          <input id="max-history" class="input" onblur="driver.setMaxHistory(this)" spellcheck="false">
                         </div>
                       </div>
                     </div>
@@ -283,68 +299,87 @@
                         </div>
                       </div>
                     </div>
-                    <div id="" class="panel-block">
+                    <div class="panel-block">
                       <label class="label is-small" for="tmaxsteps-val">Max number of steps: <br>(Negative means ignored) </label><br>
                       <input id="tmaxsteps-val" type="number" class="input is-small" style="width:180px;" onblur="" value=-1 spellcheck="false" onkeyup="driver.updateMaxSteps()">
                     </div>
+                    <div class="panel-block">
+                      <label class="switch">
+                        <input type="checkbox" id="themeSwitch" onload="if (returnThemeBasedOnLocalStorage() === 'dark') {this.clicked = true;}" onclick="enableTheme(this.checked === false ? 'light' : 'dark', true);">
+                        <span class="slider round"></span>
+                      </label>
+                      <label for="themeSwitch" style="font-weight: bold;padding-left: 20px;" id="switch_text">Dark Mode</label>
+                    </div>
                   </div>
                   <div id="tracer-settings-tab-view">
-                    <div id="" class="panel-block">
-                      <div class="field is-horizontal">
-                        <article class="tile is-child is-primary" align="center">
-                          <h3>Registers Pattern:</h3>
-                          <small>To add tabs, type '\t' & new line, type '\n'. The current valid symbols to add are:<br>
-                            <b>%0% through %31%</b> which represent the registers.<br>
-                            <b>%line%</b> is the current line which it is on.<br>
-                            <b>%pc%</b> represents the pc at the current instruction.<br>
-                            <b>%inst%</b> represents the current instruction.<br>
-                            <b>%output%</b> represents an ecall message out.</small><br>
-                            <b>%decode%</b> represents the decoded instruction bits.</small>
-                          <br>
-                          <textarea id="tregPattern" class="textarea" placeholder="Please type in the format of the output you want.">%output%%0%	%1%	%2%	%3%	%4%	%5%	%6%	%7%	%8%	%9%	%10%	%11%	%12%	%13%	%14%	%15%	%16%	%17%	%18%	%19%	%20%	%21%	%22%	%23%	%24%	%25%	%26%	%27%	%28%	%29%	%30%	%31%	%line%	%pc%	%inst%</textarea>
-                        </article>
+                  <div id="" class="panel-block">
+                    <div class="field is-horizontal">
+                      <article class="tile is-child is-primary" align="center">
+                        <h3>Registers Pattern:</h3>
+                        <small>To add tabs, type '\t' & new line, type '\n'. The current valid symbols to add are:<br>
+                          <b>%0% through %31%</b> which represent the registers.<br>
+                          <b>%line%</b> is the current line which it is on.<br>
+                          <b>%pc%</b> represents the pc at the current instruction.<br>
+                          <b>%inst%</b> represents the current instruction.<br>
+                          <b>%output%</b> represents an ecall message out.</small><br>
+                        <b>%decode%</b> represents the decoded instruction bits.</small>
+                        <br>
+                        <textarea id="tregPattern" class="textarea" placeholder="Please type in the format of the output you want.">%output%%0%	%1%	%2%	%3%	%4%	%5%	%6%	%7%	%8%	%9%	%10%	%11%	%12%	%13%	%14%	%15%	%16%	%17%	%18%	%19%	%20%	%21%	%22%	%23%	%24%	%25%	%26%	%27%	%28%	%29%	%30%	%31%	%line%	%pc%	%inst%</textarea>
+                      </article>
+                    </div>
+                  </div>
+                  <div id="" class="panel-block" align="center">
+                    <font size="2px" color="green">(&dArr; Green = True; White = false &dArr;)</font>
+                  </div>
+                  <div id="tinst-first-div" class="panel-block">
+                    <div class="field is-horizontal">
+                      <div class="field-label">
+                        <button id="tinst-first" class="button is-primary" onclick="toggleThis(this)" value="true">Inst First</button>
+                      </div>
+                      <div class="field-body is-expanded">
+                        <label class="label" for="tinst-first">Instruction first?</label>
                       </div>
                     </div>
-                    <div id="" class="panel-block" align="center">
-                      <font size="2px" color="green">(&dArr; Green = True; White = false &dArr;)</font>
+                  </div>
+                  <div id="tPCWAddr-div" class="panel-block">
+                    <div class="field is-horizontal">
+                      <div class="field-label">
+                        <button id="tPCWAddr" class="button is-primary" onclick="toggleThis(this)" value="true">PC Word Addr</button>
+                      </div>
+                      <div class="field-body is-expanded">
+                        <label class="label" for="tPCWAddr">PC Word Addressed?</label>
+                      </div>
                     </div>
-                    <div id="tinst-first-div" class="panel-block">
+                  </div>
+                  <div id="tTwoStage-div" class="panel-block">
+                    <div class="field is-horizontal">
+                      <div class="field-label">
+                        <button id="tTwoStage" class="button" onclick="toggleThis(this)" value="false">Two Stage</button>
+                      </div>
+                      <div class="field-body is-expanded">
+                        <label class="label" for="tTwoStage">Two Stage?</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="" class="panel-block">
+                    <label class="label is-small" for="ttot-cmds-val">Total number of commands: <br>(Negative means ignored)</label><br>
+                    <input id="ttot-cmds-val" type="number" class="input is-small" style="width:180px;" onblur="" value=-1 spellcheck="false">
+                  </div>
+                  <div id="" class="panel-block">
+                    <label class="label is-small" for="tbase-val">Output Number's Base: <br>(2-32)</label><br>
+                    <input id="tbase-val" type="number" class="input is-small" style="width:180px;" onblur="validateBase(this);" onkeyup="validateBase(this);" value=2 spellcheck="false">
+                  </div>
+                </div>
+                  <div id="calling-convention-settings-tab-view">
+                    <div id="enableCallingConvention-div" class="panel-block">
                       <div class="field is-horizontal">
                         <div class="field-label">
-                          <button id="tinst-first" class="button is-primary" onclick="toggleThis(this)" value="true">Inst First</button>
+                          <button id="enableCallingConvention" class="button" onclick="toggleThis(this);driver.enableCallingConvention(this.value === 'true');" value="false" style="text-align: center;height: 45px;">Enable</button>
                         </div>
                         <div class="field-body is-expanded">
-                          <label class="label" for="tinst-first">Instruction first?</label>
+                          <label class="label" for="enableCallingConvention">Enable Calling Convention Checker?</label>
                         </div>
                       </div>
-                    </div>
-                    <div id="tPCWAddr-div" class="panel-block">
-                      <div class="field is-horizontal">
-                        <div class="field-label">
-                          <button id="tPCWAddr" class="button is-primary" onclick="toggleThis(this)" value="true">PC Word Addr</button>
-                        </div>
-                        <div class="field-body is-expanded">
-                          <label class="label" for="tPCWAddr">PC Word Addressed?</label>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="tTwoStage-div" class="panel-block">
-                      <div class="field is-horizontal">
-                        <div class="field-label">
-                          <button id="tTwoStage" class="button" onclick="toggleThis(this)" value="false">Two Stage</button>
-                        </div>
-                        <div class="field-body is-expanded">
-                          <label class="label" for="tTwoStage">Two Stage?</label>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="" class="panel-block">
-                      <label class="label is-small" for="ttot-cmds-val">Total number of commands: <br>(Negative means ignored)</label><br>
-                      <input id="ttot-cmds-val" type="number" class="input is-small" style="width:180px;" onblur="" value=-1 spellcheck="false">
-                    </div>
-                    <div id="" class="panel-block">
-                      <label class="label is-small" for="tbase-val">Output Number's Base: <br>(2-32)</label><br>
-                      <input id="tbase-val" type="number" class="input is-small" style="width:180px;" onblur="validateBase(this);" onkeyup="validateBase(this);" value=2 spellcheck="false">
                     </div>
                   </div>
                   <div id="packages-tab-view">
@@ -1547,7 +1582,7 @@
                 <div class="control">
                   <div class="field">
                     <div class="select is-small">
-                      <select id="display-settings" onchange="driver.updateRegMemDisplay()">
+                      <select id="display-settings" class="display-settings" onchange="driver.updateRegMemDisplay()">
                         <option selected>Hex</option>
                         <option>Decimal</option>
                         <option>Unsigned</option>
@@ -1587,10 +1622,18 @@
 
 
 <script type="text/javascript" src="scripts/jquery.min.js"></script>
+<script type="text/javascript" src="scripts/theme.js"></script>
 <script type="text/javascript" src="scripts/alertify.min.js"></script>
 <script type="text/javascript" src="scripts/helper.js"></script>
 <script type="text/javascript" src="scripts/seedrandom.js"></script>
-<script type="text/javascript" src="js/codemirror.js"></script>
+<script type="text/javascript" src="js/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="js/codemirror/search.js"></script>
+<script type="text/javascript" src="js/codemirror/searchcursor.js"></script>
+<script type="text/javascript" src="js/codemirror/jump-to-line.js"></script>
+<script type="text/javascript" src="js/codemirror/dialog.js"></script>
+<script type="text/javascript" src="js/codemirror/comment.js"></script>
+<script type="text/javascript" src="js/codemirror/autorefresh.js"></script>
+<script type="text/javascript" src="js/codemirror/lint.js"></script>
 <script type="text/javascript" src="scripts/main.js"></script>
 <script type="text/javascript" src="scripts/terminal.js"></script>
 <script type="text/javascript" src="scripts/Draggable.min.js"></script>
@@ -1598,5 +1641,6 @@
 <script type="text/javascript" src="scripts/draggable.js"></script>
 <script type="text/javascript" src="scripts/FileSaver.js"></script>
 <script type="text/javascript" src="scripts/jszip.js"></script>
+<script type="text/javascript" src="scripts/fernetBrowser.js"></script>
 </body>
 </html>

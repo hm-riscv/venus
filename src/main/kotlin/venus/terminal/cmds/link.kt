@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 import venus.vfs.VFSLinkedProgram
 import venus.vfs.VFSObject
@@ -50,13 +51,7 @@ var link = Command(
             val obj = VFSLinkedProgram(output, t.vfs.currentLocation, linkedProgram)
             return if (t.vfs.currentLocation.addChild(obj)) "" else "link: Could not add linked program to the files!"
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size > 1) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = "This command takes in names of programs which you want to link together." +
                 "It only requires one program but takes in an arbitrary number of programs." +
                 "\nEG link out.l a.out b.out c.out" +

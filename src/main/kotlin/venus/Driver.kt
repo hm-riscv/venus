@@ -16,6 +16,7 @@ import venusbackend.riscv.*
 import venusbackend.riscv.insts.dsl.types.Instruction
 import venusbackend.riscv.insts.floating.Decimal
 import venusbackend.simulator.*
+import venusbackend.simulator.plugins.*
 import venusbackend.simulator.Tracer.Companion.wordAddressed
 import venusbackend.simulator.cache.BlockReplacementPolicy
 import venusbackend.simulator.cache.CacheError
@@ -58,17 +59,17 @@ external val document: Document
         activeFileinEditor = path ?: ""
     }
 
-    var sim: Simulator = Simulator(LinkedProgram(), VFS)
-    var tr: Tracer = Tracer(sim)
     val mainCache: CacheHandler = CacheHandler(1)
-
     var cache: CacheHandler = mainCache
     var cacheLevels: ArrayList<CacheHandler> = arrayListOf(mainCache)
     @JsName("simSettings") val simSettings = SimulatorSettings()
+    var sim: Simulator = Simulator(LinkedProgram(), VFS, settings = simSettings)
     val simState64 = SimulatorState64()
     val temp = QuadWord()
 
-    private var timer: Timeout? = null
+    var tr: Tracer = Tracer(sim)
+
+    private var timer: Int? = null
     val LS = LocalStorage()
     var useLS = false
     private var saveInterval: Timeout? = null
@@ -83,6 +84,8 @@ external val document: Document
     @JsName("activeFileinEditor") var activeFileinEditor: String = ""
 
     @JsName("driver_complete_loading") var driver_complete_loading: Boolean = false
+
+    var doCallingConventionCheck: Boolean = false
 
     init {
         /* This code right here is so that you can add custom kotlin code even after venus has been loaded! */
@@ -422,6 +425,9 @@ external val document: Document
         mainCache.reset()
         sim.state.cache = mainCache
         tr = Tracer(sim)
+        if (doCallingConventionCheck) {
+            this.enableCallingConvention(true)
+        }
     }
 
     fun getMaxSteps(): Int {
@@ -513,10 +519,14 @@ external val document: Document
     @JsName("reset") fun reset() {
         try {
             val args = sim.args
+            val plugins = sim.plugins
             sim = Simulator(sim.linkedProgram, VFS, sim.settings, simulatorID = sim.simulatorID)
             tr.sim = sim
             for (arg in args) {
                 sim.addArg(arg)
+            }
+            for ((id, p) in plugins) {
+                sim.registerPlugin(id, p)
             }
             mainCache.reset()
             sim.state.setCacheHandler(mainCache)
@@ -562,6 +572,7 @@ external val document: Document
 
     @JsName("runEnd") fun runEnd() {
         handleNotExitOver()
+        sim.finishPlugins()
         Renderer.updatePC(sim.getPC())
         Renderer.updateAll()
         Renderer.setRunButtonSpinning(false)
@@ -663,6 +674,10 @@ external val document: Document
         Renderer.renderTracerSettingsTab()
     }
 
+    @JsName("openCallingConventionSettingsTab") fun openCallingConventionSettingsTab() {
+        Renderer.renderCallingConventionSettingsTab()
+    }
+
     @JsName("openPackagesTab") fun openPackagesTab() {
         Renderer.renderPackagesTab()
     }
@@ -692,6 +707,15 @@ external val document: Document
         Renderer.renderTab(tabid, tabs)
         if (tabid == "venus-files") {
             refreshVFS()
+        }
+    }
+
+    @JsName("enableCallingConvention") fun enableCallingConvention(enabled: Boolean) {
+        doCallingConventionCheck = enabled
+        if (doCallingConventionCheck) {
+            sim.registerPlugin("CC", CallingConventionCheck())
+        } else {
+            sim.removePlugin("CC")
         }
     }
 
@@ -818,6 +842,20 @@ external val document: Document
             input.value = ts
         } catch (e: Throwable) {
             handleError("Verify Text", e)
+        }
+    }
+
+    @JsName("setMaxHistory") fun setMaxHistory(input: HTMLInputElement) {
+        try {
+            var i = userStringToInt(input.value)
+            try {
+                sim.setHistoryLimit(i)
+            } catch (e: SimulatorError) {
+                console.warn(e.toString())
+            }
+        } catch (e: NumberFormatException) {
+            /* do nothing */
+            console.warn("Unknown number format!")
         }
     }
 
@@ -1197,6 +1235,8 @@ external val document: Document
         LS.set("trace_wordAddressed", wordAddressed.toString())
         LS.set("trace_TwoStage", tr.twoStage.toString())
 
+        /* History Limit */
+        LS.set("history_limit", this.simSettings.max_histroy.toString())
         /*Text Begin*/
         LS.set("text_begin", MemorySegments.TEXT_BEGIN.toString())
         /*Other Settings*/
@@ -1205,6 +1245,7 @@ external val document: Document
         LS.set("ecall_exit_only", simSettings.ecallOnlyExit.toString())
         LS.set("set_regs_on_init", simSettings.setRegesOnInit.toString())
         LS.set("simargs", getDefaultArgs())
+        LS.set("enableCallingConvention", this.doCallingConventionCheck.toString())
 
         /*Program*/
         js("codeMirror.save()")
@@ -1268,6 +1309,8 @@ external val document: Document
         var tws = t.twoStage.toString()
         var wa = wordAddressed.toString()
 
+        /* History Limit */
+        var hlim = this.simSettings.max_histroy.toString()
         /*Text begin*/
         var txtStart = Renderer.intToString(MemorySegments.TEXT_BEGIN)
         /*Other Settings*/
@@ -1277,6 +1320,7 @@ external val document: Document
         var sroi = simSettings.setRegesOnInit.toString()
         var simargs = ""
         var defaultTab = "venus"
+        var docc = "false"
 
         /*Program*/
         js("codeMirror.save()")
@@ -1292,6 +1336,9 @@ external val document: Document
             tws = LS.safeget("trace_TwoStage", tws)
             wa = LS.safeget("trace_wordAddressed", wa)
 
+            /* History Limit */
+            hlim = LS.safeget("history_limit", hlim)
+
             /*Text Begin*/
             txtStart = LS.safeget("text_begin", txtStart)
 
@@ -1302,6 +1349,7 @@ external val document: Document
             sroi = LS.safeget("set_regs_on_init", sroi)
             simargs = LS.safeget("simargs", simargs)
             defaultTab = LS.safeget("defaultTab", defaultTab)
+            docc = LS.safeget("enableCallingConvention", docc)
 
             /*Program*/
             p = LS.safeget("prog", p)
@@ -1374,6 +1422,11 @@ external val document: Document
         Renderer.renderButton(document.getElementById("tTwoStage") as HTMLButtonElement, tws == "true")
         tr.twoStage = tws == "true"
 
+        /* History Limit */
+        val hl = document.getElementById("max-history") as HTMLInputElement
+        hl.value = hlim
+        setMaxHistory(hl)
+
         /*Text Begin*/
         val ts = document.getElementById("text-start") as HTMLInputElement
         ts.value = txtStart
@@ -1389,6 +1442,8 @@ external val document: Document
         Renderer.renderButton(document.getElementById("setRegsOnInit") as HTMLButtonElement, sroi == "true")
         simSettings.setRegesOnInit = sroi == "true"
         (document.getElementById("ArgsList") as HTMLInputElement).value = simargs
+        Renderer.renderButton(document.getElementById("enableCallingConvention") as HTMLButtonElement, docc == "true")
+        enableCallingConvention(docc == "true")
 
         /*Program*/
         js("codeMirror.setValue(driver.p);")
@@ -1418,12 +1473,18 @@ external val document: Document
     lateinit var fileExplorerCurrentLocation: VFSObject
 
     @JsName("deleteVFObject") fun deleteVFObject(name: String) {
-        VFS.rm(name, fileExplorerCurrentLocation)
-        refreshVFS()
+        if (window.confirm("Are you sure you want to delete this file?")) {
+            VFS.rm(name, fileExplorerCurrentLocation)
+            refreshVFS()
+        }
     }
 
     @JsName("openVFObject") fun openVFObject(name: String) {
-        val s = VFS.chdir(name, fileExplorerCurrentLocation)
+        var s = VFS.chdir(name, fileExplorerCurrentLocation)
+        if (s is Pair<*, *>) {
+            console.log(s.second)
+            s = s.first!!
+        }
         if (s is VFSObject && s.type in listOf(VFSType.Drive, VFSType.Folder)) {
             fileExplorerCurrentLocation = s
             openVFObjectfromObj(fileExplorerCurrentLocation)
@@ -1435,11 +1496,18 @@ external val document: Document
     fun openVFObjectfromObj(obj: VFSObject) {
         Renderer.clearObjectsFromDisplay()
         Renderer.addFilePWD(obj)
-        for ((key, value) in fileExplorerCurrentLocation.contents) {
+//        for ((key, value) in fileExplorerCurrentLocation.contents) {
+//            if (key in listOf(".", "..")) {
+//                Renderer.addObjectToDisplay(value as VFSObject, key)
+//            } else {
+//                Renderer.addObjectToDisplay(value as VFSObject)
+//            }
+//        }
+        for (key in fileExplorerCurrentLocation.childrenNames()) {
             if (key in listOf(".", "..")) {
-                Renderer.addObjectToDisplay(value as VFSObject, key)
+                Renderer.addObjectToDisplay(fileExplorerCurrentLocation.getChild(key) as VFSObject, key)
             } else {
-                Renderer.addObjectToDisplay(value as VFSObject)
+                Renderer.addObjectToDisplay(fileExplorerCurrentLocation.getChild(key) as VFSObject)
             }
         }
     }
@@ -1448,7 +1516,42 @@ external val document: Document
         openVFObject(".")
     }
 
+    fun saveEditorIfModified(): Boolean {
+        // Returns if there was an error.
+        if (activeFileinEditor == "") {
+            return true
+        }
+        val txt: String = try {
+            js("codeMirror.save();")
+            this.getText()
+        } catch (e: Throwable) {
+            console.error(e)
+            return false
+        }
+        val s = VFS.getObjectFromPath(activeFileinEditor, location = fileExplorerCurrentLocation)
+        if (s is VFSObject && s.type == VFSType.File) {
+            if ((s as VFSFile).readText() != txt) {
+                if (window.confirm("Detected a modification in the opened file in the editor! Do you want to save it before opening the new file?")) {
+                    saveVFObjectfromObj(s)
+                }
+            }
+        } else {
+            console.log(s)
+            return false
+        }
+        return true
+    }
+
     fun editVFObjectfromObj(obj: VFSObject) {
+        if (activeFileinEditor == obj.getPath()) {
+            this.openEditor()
+            return
+        }
+        if (!saveEditorIfModified()) {
+            if (!window.confirm("Could not save active file! Do you still want to open the new file?")) {
+                return
+            }
+        }
         if (obj.type !== VFSType.File) {
             console.warn("Only files can be loaded into the editor.")
             return
@@ -1477,6 +1580,10 @@ external val document: Document
     }
 
     fun saveVFObjectfromObj(obj: VFSObject, save: Boolean = true) {
+        val name = obj.getPath()
+        if (activeFileinEditor != name && !window.confirm("Are you sure you want to save the file `$activeFileinEditor` to the file `$name`?")) {
+            return
+        }
         val txt: String
         try {
             js("codeMirror.save();")

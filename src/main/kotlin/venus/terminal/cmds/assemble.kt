@@ -2,6 +2,7 @@ package venus.terminal.cmds
 
 import venusbackend.assembler.Assembler
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 import venus.vfs.VFSFile
 import venus.vfs.VFSObject
@@ -23,14 +24,14 @@ var assemble = Command(
             if (file.type != VFSType.File) {
                 return "assemble: $filein: Is a directory"
             }
-            if (!file.contents.containsKey(VFSFile.innerTxt)) {
-                return "assemble: $filein: COULD NOT FIND FILE CONTENTS!"
-            }
+//            if (!file.contents.containsKey(VFSFile.innerTxt)) {
+//                return "assemble: $filein: COULD NOT FIND FILE CONTENTS!"
+//            }
             if (!VFSObject.isValidName(programout)) {
                 return "assemble: $programout: Invalid name"
             }
             var msg = ""
-            val (prog, errors, warnings) = Assembler.assemble(file.contents.get(VFSFile.innerTxt) as String, programout, file.getPath())
+            val (prog, errors, warnings) = Assembler.assemble((file as VFSFile).readText(), programout, file.getPath())
             if (errors.isNotEmpty()) {
                 msg += "assemble: Could not assemble file! Here are the errors:"
                 for (error in errors) {
@@ -48,13 +49,7 @@ var assemble = Command(
             file.parent.addChild(p)
             return msg
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size == 1) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = """assemble: takes in two arguments: [text in] {[program out], a.out}
             |Returns a.out if no second argument exists""".trimMargin()
 )

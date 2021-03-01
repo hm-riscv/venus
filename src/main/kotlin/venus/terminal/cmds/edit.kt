@@ -2,6 +2,7 @@ package venus.terminal.cmds
 
 import venus.Driver
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 import venus.vfs.VFSType
 
@@ -29,13 +30,7 @@ var edit = Command(
             }
             return ""
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size == 1) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = "edit: Takes in one argument [filename] and will copy the contents to the editor tab and then go to the editor tab." +
                 "\nUsage: edit [filename]"
 )

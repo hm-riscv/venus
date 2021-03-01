@@ -76,6 +76,11 @@ class Terminal(var vfs: VirtualFileSystem) {
                             possibleCommands.add(c)
                         }
                     }
+                    if (possibleCommands.isEmpty()) {
+                        val posFiles = Command.fileTabComplete(args, t = this, sudo = sudo)[1]!! as ArrayList<*>
+                        val pfix = VirtualFileSystem.getPath(prefix).lastOrNull() ?: prefix
+                        return listTojsList(listOf(pfix, listTojsList(posFiles)))
+                    }
                     return listTojsList(listOf(prefix, listTojsList(possibleCommands)))
                 } else {
                     val cmd = Command[args.removeAt(0)]

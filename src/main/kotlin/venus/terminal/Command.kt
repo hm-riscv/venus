@@ -1,5 +1,8 @@
 package venus.terminal
 
+import venus.vfs.VFSObject
+import venus.vfs.VirtualFileSystem
+
 open class Command(
     val name: String,
     val execute: (parsedInput: MutableList<String>, t: Terminal, sudo: Boolean) -> String =
@@ -22,6 +25,25 @@ open class Command(
         operator fun get(name: String) =
                 allCommands.firstOrNull { it.name == name }
                         ?: throw CommandNotFoundError(name)
+
+        @OptIn(ExperimentalStdlibApi::class)
+        fun fileTabComplete(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
+            if (args.size >= 1) {
+                val pfix = args[args.size - 1]
+                val path = VirtualFileSystem.getPath(pfix)
+                val prefix = try {
+                    path.removeLast()
+                } catch (e: NoSuchElementException) {
+                    pfix
+                }
+                var paths = path.joinToString(separator = VFSObject.separator)
+                if (pfix.startsWith("/")) {
+                    paths = "/$paths"
+                }
+                return arrayListOf(prefix, t.vfs.filesFromPrefix(paths, prefix))
+            }
+            return arrayListOf("", ArrayList<String>())
+        }
     }
 
     init {

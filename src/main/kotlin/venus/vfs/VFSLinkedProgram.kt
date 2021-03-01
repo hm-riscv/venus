@@ -2,7 +2,7 @@ package venus.vfs
 
 import venusbackend.linker.LinkedProgram
 
-class VFSLinkedProgram(override var label: String, override var parent: VFSObject, prog: LinkedProgram = LinkedProgram()) : VFSObject {
+class VFSLinkedProgram(override var label: String, override var parent: VFSObject, prog: LinkedProgram = LinkedProgram(), override var mountedHandler: VFSMountedDriveHandler? = null) : VFSObject {
     override val type = VFSType.LinkedProgram
     override var contents = HashMap<String, Any>()
     override var permissions = VFSPermissions()

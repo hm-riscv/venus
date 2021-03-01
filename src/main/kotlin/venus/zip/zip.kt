@@ -32,14 +32,14 @@ class Zip {
     }
 
     private fun addFolderHelper(folder: VFSFolder, int_zip: JSZip) {
-        for (s in folder.contents.keys) {
+        for (s in folder.childrenNames()) {
             if (s !in listOf(".", "..")) {
-                val type = (folder.contents[s] as VFSObject).type
+                val type = (folder.getChild(s) as VFSObject).type
                 if (type == VFSType.File) {
-                    val file = folder.contents[s] as VFSFile
+                    val file = folder.getChild(s) as VFSFile
                     this.addFileHelper(file.label, file.readText(), int_zip)
                 } else if (type == VFSType.Folder) {
-                    val fold = folder.contents[s] as VFSFolder
+                    val fold = folder.getChild(s) as VFSFolder
                     val newf = int_zip.folder(fold.name)
                     this.addFolderHelper(fold, newf)
                 } else {

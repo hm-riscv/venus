@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 import venus.vfs.VFSFile
 import venus.vfs.VFSFolder
@@ -23,12 +24,6 @@ var unzip = Command(
             z.loadZip(file as VFSFile, t.vfs, t.vfs.currentLocation as VFSFolder)
             return "VDIRECTIVE:EXEFN..."
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size > 0) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = "This command will unzip the file specified into the current directory."
 )

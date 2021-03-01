@@ -2,6 +2,7 @@ package venus.terminal.cmds
 
 import venus.Driver
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 
 var save = Command(
@@ -32,13 +33,7 @@ var save = Command(
             }
             return result
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size == 1) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = """Saves the data in the editor to the specified file.
             |Usage: save [filename]
         """.trimMargin()

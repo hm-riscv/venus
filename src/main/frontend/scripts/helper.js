@@ -2,28 +2,32 @@
 var url_string = window.location.href;
 var url = new URL(url_string);
 if (url.searchParams.get("clear") === "true") {
-    console.log("Found clear message! Removing venus data from the localStorage...");
-    localStorage.removeItem("venus");
-    function removeURLParameter(url, parameter) {
-        //prefer to use l.search if you have a location/link object
-        var urlparts= url.split('?');
-        if (urlparts.length>=2) {
+    var clear = window.confirm("Would you like to clear Venus's settings? (Warning: this action cannot be undone!)");
 
-            var prefix= encodeURIComponent(parameter)+'=';
-            var pars= urlparts[1].split(/[&;]/g);
+    if (clear) {
+        console.log("Found clear message! Removing venus data from the localStorage...");
+        localStorage.removeItem("venus");
+        function removeURLParameter(url, parameter) {
+            //prefer to use l.search if you have a location/link object
+            var urlparts= url.split('?');
+            if (urlparts.length>=2) {
 
-            //reverse iteration as may be destructive
-            for (var i= pars.length; i-- > 0;) {
-                //idiom for string.startsWith
-                if (pars[i].lastIndexOf(prefix, 0) !== -1) {
-                    pars.splice(i, 1);
+                var prefix= encodeURIComponent(parameter)+'=';
+                var pars= urlparts[1].split(/[&;]/g);
+
+                //reverse iteration as may be destructive
+                for (var i= pars.length; i-- > 0;) {
+                    //idiom for string.startsWith
+                    if (pars[i].lastIndexOf(prefix, 0) !== -1) {
+                        pars.splice(i, 1);
+                    }
                 }
-            }
 
-            url= urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : "");
-            return url;
-        } else {
-            return url;
+                url= urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : "");
+                return url;
+            } else {
+                return url;
+            }
         }
     }
     window.location.replace(removeURLParameter(window.location.href, "clear"))
@@ -335,22 +339,22 @@ function httpGetAsync(theUrl, callback)
     xmlHttp.send(null);
 }
 
-(function() {
-    var cors_api_host = 'cors-anywhere.herokuapp.com';
-    var cors_api_url = 'https://' + cors_api_host + '/';
-    var slice = [].slice;
-    var origin = window.location.protocol + '//' + window.location.host;
-    var open = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        var args = slice.call(arguments);
-        var targetOrigin = /^https?:\/\/([^\/]+)/i.exec(args[1]);
-        if (targetOrigin && targetOrigin[0].toLowerCase() !== origin &&
-            targetOrigin[1] !== cors_api_host) {
-            args[1] = cors_api_url + args[1];
-        }
-        return open.apply(this, args);
-    };
-})();
+// (function() {
+//     var cors_api_host = 'cors-anywhere.herokuapp.com';
+//     var cors_api_url = 'https://' + cors_api_host + '/';
+//     var slice = [].slice;
+//     var origin = window.location.protocol + '//' + window.location.host;
+//     var open = XMLHttpRequest.prototype.open;
+//     XMLHttpRequest.prototype.open = function() {
+//         var args = slice.call(arguments);
+//         var targetOrigin = /^https?:\/\/([^\/]+)/i.exec(args[1]);
+//         if (targetOrigin && targetOrigin[0].toLowerCase() !== origin &&
+//             targetOrigin[1] !== cors_api_host) {
+//             args[1] = cors_api_url + args[1];
+//         }
+//         return open.apply(this, args);
+//     };
+// })();
 
 function loadfromtarget(t) {
     // httpGetAsync("https://cors-anywhere.herokuapp.com/" + t, lftcallback);
@@ -360,3 +364,28 @@ function loadfromtarget(t) {
 function lftcallback(resp) {
     codeMirror.setValue(resp);
 }
+
+// document.addEventListener ("keydown", function (zEvent) {
+//     if (zEvent.ctrlKey  && zEvent.key === "c") {
+//         if (driver.LS.get("defaultTab") === "venus") {
+//             driver.runEnd();
+//             var cl = document.getElementsByClassName("cmdline");
+//             if (cl.length > 0) {
+//                 cl[cl.length - 1].focus();
+//             }
+//         }
+//     }
+// });
+
+// try {
+//     var venusBodyTabView = document.getElementById("venus-body-tab-view");
+//     // var venusBodyTabViewChild = document.getElementById("venus-body-tab-view-child");
+//     var venusBodyTabViewChild = document.getElementById("container");
+// } catch (e) {
+//     console.error(e);
+// }
+// function modifyTerminalSize() {
+//     venusBodyTabViewChild.style.width = (venusBodyTabView.clientWidth).toString() + "px";
+// }
+// modifyTerminalSize();
+// window.onresize = modifyTerminalSize;

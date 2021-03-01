@@ -2,7 +2,7 @@ package venus.vfs
 
 import venus.vfs.VFSObject.Companion.isValidName
 
-open class VFSFolder(var name: String, override var parent: VFSObject) : VFSObject {
+open class VFSFolder(var name: String, override var parent: VFSObject, override var mountedHandler: VFSMountedDriveHandler? = null) : VFSObject {
     override val type = VFSType.Folder
     override var label = name
     override var contents = HashMap<String, Any>()
@@ -40,7 +40,7 @@ open class VFSFolder(var name: String, override var parent: VFSObject) : VFSObje
     }
 
     companion object {
-        fun inflate(jsonContainer: JsonContainer, parent: VFSObject): VFSObject {
+        fun inflate(jsonContainer: JsonContainer, parent: VFSObject): VFSObject? {
             val folder = VFSFolder(jsonContainer.label, parent)
             for (i in 0 until js("jsonContainer.contents.length")) {
                 val value = js("jsonContainer.contents[i]")
@@ -67,7 +67,7 @@ open class VFSFolder(var name: String, override var parent: VFSObject) : VFSObje
                         VFSDummy()
                     }
                 }
-                if (addchild) {
+                if (addchild && obj != null) {
                     folder.addChild(obj)
                 }
             }

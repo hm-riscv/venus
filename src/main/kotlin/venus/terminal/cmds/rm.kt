@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 
 var rm = Command(
@@ -22,13 +23,7 @@ var rm = Command(
             }
             return output
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size > 0) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = """Remove (unlink) the FILE(s),
             |Usage: rm [OPTION]... [FILE]...
             |NOTE: Options and multiple file input is currently not implemented yet.

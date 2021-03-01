@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 
 var cat = Command(
@@ -8,13 +9,7 @@ var cat = Command(
         execute = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): String {
             return t.vfs.cat(args.joinToString(" "))
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            if (args.size == 1) {
-                val prefix = args[args.size - 1]
-                return arrayListOf(prefix, t.vfs.filesFromPrefix(prefix))
-            }
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = "cat: takes in one argument (a file or path to a file) and prints out the contents of the file." +
                 "\nEx cat foo.txt" +
                 "\nUsage: cat [path to file]"

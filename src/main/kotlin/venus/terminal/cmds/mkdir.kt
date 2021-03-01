@@ -1,6 +1,7 @@
 package venus.terminal.cmds
 
 import venus.terminal.Command
+import venus.terminal.Command.Companion.fileTabComplete
 import venus.terminal.Terminal
 
 var mkdir = Command(
@@ -15,9 +16,7 @@ var mkdir = Command(
             }
             return result
         },
-        tab = fun(args: MutableList<String>, t: Terminal, sudo: Boolean): ArrayList<Any> {
-            return arrayListOf("", ArrayList<String>())
-        },
+        tab = ::fileTabComplete,
         help = """This command makes a folder in the current directory or path.
             |Usage: mkdir [new folder name]
         """.trimMargin()
