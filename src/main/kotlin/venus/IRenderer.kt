@@ -58,14 +58,14 @@ interface IRenderer {
         return true;
     }
 
-    
+
     /**
      * Shows the simulator tab and hides other tabs
      *
      * @param displaySim the simulator to show
      */
     fun renderSimulator(){
-        
+
     }
 
     fun loadSimulator(displaySim: Simulator) {
@@ -101,20 +101,20 @@ interface IRenderer {
      * @param tab the name of the tab (currently "editor" or "simulator")
      */
     @JsName("tabSetVisibility") private fun tabSetVisibility(tab: String, display: String) {
-        
+
     }
 
     fun displayWarning(w: String) {
-        
+
     }
 
     /** Display a given ERROR */
     fun displayError(thing: Any) {
-        
+
     }
 
     fun stdout(thing: Any) {
-        
+
     }
 
     fun stderr(thing: Any) {
@@ -134,7 +134,7 @@ interface IRenderer {
      * Renders the program listing under the debugger
      */
     private fun renderProgramListing() {
-        
+
     }
 
     /**
@@ -143,7 +143,7 @@ interface IRenderer {
      * @todo refactor this into a "reset" and "update" all function
      */
     fun updateAll() {
-        
+
     }
 
     /**
@@ -152,7 +152,7 @@ interface IRenderer {
      * @param diffs the list of diffs to apply
      */
     fun updateFromDiffs(diffs: List<Diff>) {
-        
+
     }
 
     /**
@@ -160,7 +160,7 @@ interface IRenderer {
      *
      * @todo find a less hacky way to do this?
      */
-    fun clearProgramListing() {    
+    fun clearProgramListing() {
     }
 
     /**
@@ -171,7 +171,7 @@ interface IRenderer {
      * @param progLine the original assembly code
      */
     fun addToProgramListing(pcx: Int, mcode: MachineCode, progLine: String, invalidInst: Boolean = false) {
-        
+
     }
 
     fun updateProgramListing(idx: Number, inst: Int, orig: String? = null): InstructionDiff {
@@ -239,7 +239,7 @@ interface IRenderer {
 
     //TODO: Can I get rid of optional parameter
     fun updateCacheBlocks(b: ChangedBlockState = ChangedBlockState(0, BlockState.MISS)) {
-        
+
     }
 
     fun updateAllCacheBlocks() {
@@ -318,7 +318,7 @@ interface IRenderer {
     /**
      * Number of rows to show around the current address
      */
-   
+
 
     /** Show the memory sidebar tab */
     fun renderMemoryTab() {
@@ -398,7 +398,7 @@ interface IRenderer {
         return row
     }
 
-    
+
 
     /**
      * Convert a certain byte to hex
@@ -495,5 +495,8 @@ interface IRenderer {
     }
 
     fun clearObjectsFromDisplay() {
+    }
+
+    fun renderCallingConventionSettingsTab() {
     }
 }

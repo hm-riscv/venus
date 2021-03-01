@@ -69,7 +69,7 @@ external val document: Document
 
     var tr: Tracer = Tracer(sim)
 
-    private var timer: Int? = null
+    private var timer: Timeout? = null
     val LS = LocalStorage()
     var useLS = false
     private var saveInterval: Timeout? = null
@@ -1472,12 +1472,12 @@ external val document: Document
 
     lateinit var fileExplorerCurrentLocation: VFSObject
 
-    @JsName("deleteVFObject") fun deleteVFObject(name: String) {
-        if (window.confirm("Are you sure you want to delete this file?")) {
-            VFS.rm(name, fileExplorerCurrentLocation)
-            refreshVFS()
-        }
-    }
+    // @JsName("deleteVFObject") fun deleteVFObject(name: String) {
+    //     if (window.confirm("Are you sure you want to delete this file?")) {
+    //         VFS.rm(name, fileExplorerCurrentLocation)
+    //         refreshVFS()
+    //     }
+    // }
 
     @JsName("openVFObject") fun openVFObject(name: String) {
         var s = VFS.chdir(name, fileExplorerCurrentLocation)
@@ -1531,9 +1531,9 @@ external val document: Document
         val s = VFS.getObjectFromPath(activeFileinEditor, location = fileExplorerCurrentLocation)
         if (s is VFSObject && s.type == VFSType.File) {
             if ((s as VFSFile).readText() != txt) {
-                if (window.confirm("Detected a modification in the opened file in the editor! Do you want to save it before opening the new file?")) {
-                    saveVFObjectfromObj(s)
-                }
+                // if (window.confirm("Detected a modification in the opened file in the editor! Do you want to save it before opening the new file?")) {
+                //     saveVFObjectfromObj(s)
+                // }
             }
         } else {
             console.log(s)
@@ -1548,9 +1548,9 @@ external val document: Document
             return
         }
         if (!saveEditorIfModified()) {
-            if (!window.confirm("Could not save active file! Do you still want to open the new file?")) {
-                return
-            }
+            // if (!window.confirm("Could not save active file! Do you still want to open the new file?")) {
+            //     return
+            // }
         }
         if (obj.type !== VFSType.File) {
             console.warn("Only files can be loaded into the editor.")
@@ -1581,9 +1581,9 @@ external val document: Document
 
     fun saveVFObjectfromObj(obj: VFSObject, save: Boolean = true) {
         val name = obj.getPath()
-        if (activeFileinEditor != name && !window.confirm("Are you sure you want to save the file `$activeFileinEditor` to the file `$name`?")) {
-            return
-        }
+        // if (activeFileinEditor != name && !window.confirm("Are you sure you want to save the file `$activeFileinEditor` to the file `$name`?")) {
+        //     return
+        // }
         val txt: String
         try {
             js("codeMirror.save();")
