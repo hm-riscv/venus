@@ -64,7 +64,7 @@ external val document: Document
 
     var cache: CacheHandler = mainCache
     var cacheLevels: ArrayList<CacheHandler> = arrayListOf(mainCache)
-    val simSettings = SimulatorSettings()
+    @JsName("simSettings") val simSettings = SimulatorSettings()
     val simState64 = SimulatorState64()
     val temp = QuadWord()
 
