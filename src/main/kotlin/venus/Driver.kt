@@ -28,6 +28,9 @@ import kotlin.dom.addClass
 import kotlin.dom.removeClass
 import kotlin.dom.hasClass
 import org.w3c.dom.*
+import kotlin.js.JSON
+import kotlin.js.Json
+import kotlin.js.json
 
 external class Timeout
 external fun setInterval(
@@ -86,6 +89,9 @@ external val document: Document
     @JsName("driver_complete_loading") var driver_complete_loading: Boolean = false
 
     var doCallingConventionCheck: Boolean = false
+
+    private var eCallReceiver: ((String)->(String))? = null
+
 
     init {
         /* This code right here is so that you can add custom kotlin code even after venus has been loaded! */
@@ -163,8 +169,38 @@ external val document: Document
     }
 
     @JsName("registerECallReceiver")
-    fun registerECallReceiver(receiverFunction: (String) -> String) {
-        sim.registerECallReceiver(receiverFunction)
+    fun registerECallReceiver(receiverFunction: (String) -> String): Boolean {
+        sim.registerECallReceiver(::eCallHook)
+        eCallReceiver = receiverFunction
+
+        return true
+    }
+
+    fun eCallHook(id: Int): Boolean {
+        val params = json(
+            "a0" to id,
+            "a1" to sim.getReg(11),
+            "a2" to sim.getReg(12),
+            "a3" to sim.getReg(13),
+            "a4" to sim.getReg(14),
+            "a5" to sim.getReg(15),
+            "a6" to sim.getReg(16),
+            "a7" to sim.getReg(17)
+        )
+
+        val result = eCallReceiver?.invoke(JSON.stringify(json("id" to id, "params" to params)))
+
+        if (result != null) {
+            val jsonobj: Json = JSON.parse(result)
+
+            val a0: Any? = jsonobj.get("a0")
+            val a1: Any? = jsonobj.get("a1")
+
+            if (a0 is Int) sim.setReg(10, a0)
+            if (a1 is Int) sim.setReg(11, a1)
+            return true
+        }
+        return false
     }
 
     @JsName("getInstructions") fun getIntructions(): Array<InstructionInfo> {
