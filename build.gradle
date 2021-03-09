@@ -81,4 +81,5 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
+    implementation("org.jetbrains.kotlinx:kotlinx-nodejs:0.0.7")
 }
