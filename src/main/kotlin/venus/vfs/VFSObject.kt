@@ -23,7 +23,11 @@ interface VFSObject {
         var path = ""
         var node: VFSObject? = this
         while (node != null && node.parent != node && node.parent !is VFSDummy) {
-            path = separator + node.label + path
+            path = if (node is VFSDrive) {
+                node.label + path
+            } else {
+                separator + node.label + path
+            }
             node = node.parent
         }
         return (path)
