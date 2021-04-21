@@ -252,18 +252,22 @@ import kotlin.browser.window
     fun getObjectFromPath(path: String, make: Boolean = false, location: VFSObject? = null): VFSObject? {
 
         val splitpath = getPath(path)
-        splitpath = if (path.startsWith("/") || path == "") {
+
+        if (path == "" || path == "/") {
+            return sentinel
+        }
+
+        if (path.startsWith("/")) {
             if (splitpath.size > 0) {
                 splitpath.removeAt(0)
+            } else {
+                return sentinel
             }
-            sentinel
-        } else {
-            splitpath
         }
 
         var curloc = location ?: sentinel
-
         val fname = splitpath.removeAt(splitpath.size - 1)
+
         for (p in splitpath) {
             curloc = if (curloc.containsChild(p)) {
                 val next = curloc.getChild(p)!! as VFSObject
