@@ -252,6 +252,14 @@ import kotlin.browser.window
     fun getObjectFromPath(path: String, make: Boolean = false, location: VFSObject? = null): VFSObject? {
 
         val splitpath = getPath(path)
+        splitpath = if (path.startsWith("/") || path == "") {
+            if (splitpath.size > 0) {
+                splitpath.removeAt(0)
+            }
+            sentinel
+        } else {
+            splitpath
+        }
 
         var curloc = location ?: sentinel
 
@@ -277,7 +285,6 @@ import kotlin.browser.window
         }
         val f = VFSFile(fname, curloc)
         var fpath = f.getPath()
-        fpath = fpath.trimStart('/')
         f.setText(fs.readFileSync(fpath, "utf-8"))
         curloc.addChild(f)
         return f
